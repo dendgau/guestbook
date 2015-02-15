@@ -109,7 +109,7 @@ class GreetingEditView(FormView):
 			)	
 		self.greeting_update(form)	
 		time.sleep(0.5)
-		return redirect("/edit?id=" + str(form.cleaned_data["greeting_id"]))
+		return redirect("/guestbook/edit?id=" + str(form.cleaned_data["greeting_id"]))
 	
     def greeting_update(self, form):
     	greeting_id = form.cleaned_data["greeting_id"]

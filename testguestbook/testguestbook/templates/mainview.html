@@ -18,6 +18,7 @@
 					<td>Guestbook</td>
 					<td>Content</td>
 					<td>Date</td>
+					{% if userInfo %}<td>Modify</td>{% endif %}
 				</tr>
 			</thead>
 			{% for greeting in greetings %}
@@ -43,6 +44,20 @@
 						<td>	
 							{{ greeting.date}}
 						</td>
+						
+						{% if userInfo %}
+							<td>
+							{% if isAdmin %}
+								<a href="{% url "edit" %}?id={{greeting.key.id}}">Edit</a>
+								<a href="{% url "delete" %}?id={{greeting.key.id}}">Remove</a>
+							{% else %}
+								{% if userInfo = greeting.author %}
+									<a href="{% url "edit" %}?id={{greeting.key.id}}">Edit</a>
+								{% endif %}
+							{% endif %}
+							</td>
+						{% endif %}
+						
 					</tr>
 				</tbody>
 			{% endfor %}
