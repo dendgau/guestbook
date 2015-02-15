@@ -1,0 +1,40 @@
+{% load staticfiles %}
+{% load url from future %}
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<title>Test GuestBook</title>
+
+		<link href="{% static "homepage.css" %}" rel="stylesheet"/>
+	</head>
+	<body>
+		{% for message in messages %}
+            {{message}}
+        {% endfor %}
+		<div class="main">
+			{{ form.non_field_errors }}
+			<form method="post"  action="{% url "sign" %}">
+				{% csrf_token %}
+				{{ form.non_field_errors }}
+				<table>
+					<tr>
+						<td>{{form.guestbook_name.label}}<td>
+						<td>{{form.guestbook_name}}</td>
+						<td style="color:red">{{form.guestbook_name.errors}}</td>
+					</tr>
+					<tr>
+						<td>{{form.greeting_message.label}}<td>
+						<td>{{form.greeting_message}}</td>
+						<td style="color:red">{{form.greeting_message.errors}}</td>
+					</tr>
+					<tr>
+						<td><input type="submit" value="Send" /></td>
+					</tr>
+				</table>
+			</form>
+			<a href="{% url "home" %}">Home</a>
+		</div>
+	</body>
+</html>
