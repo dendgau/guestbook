@@ -7,12 +7,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from guestbook.views import MainView, SignView, GreetingEditView, GreetingDeleteView
+from API.views import GreetingService, GreetingDeleteService
 admin.autodiscover()
 
 urlpatterns = patterns('',
-
-	url(r"^$", MainView.as_view(), name="home"),
-	url(r'^guestbook/', include('guestbook.urls')),
-	url(r'^API/', include('API.urls')),
-	
-)  + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+	url(r"^guestbook/(?P<guestbook_name>.+)/greeting/(?P<greeting_id>\d+)$", GreetingService.as_view()),
+	url(r"^guestbook/(?P<guestbook_name>.+)/greeting/(?P<greeting_id>\d+)$", GreetingDeleteService.as_view()),
+)
