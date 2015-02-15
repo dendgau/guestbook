@@ -9,9 +9,7 @@ from django.conf.urls.static import static
 from guestbook.views import MainView, SignView, GreetingEditView, GreetingDeleteView
 admin.autodiscover()
 
-urlpatterns = patterns('',
-
-	url(r"^$", MainView.as_view(), name="home"),
-	url(r'^guestbook/', include('guestbook.urls')),
-	
-)  + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+from guestbook.views import MainView, SignView, GreetingEditView, GreetingDeleteView
+urlpatterns = patterns("",           
+	url(r"^sign$", SignView.as_view(), name="sign"),
+)
