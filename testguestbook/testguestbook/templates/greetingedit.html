@@ -8,9 +8,6 @@
 		<title>Test GuestBook</title>
 	</head>
 	<body>
-		{% for message in messages %}
-            {{message}}
-        {% endfor %}
 		<div class="main">
 			{{ form.non_field_errors }}
 			<form method="post"  action="{% url "edit" %}?id={{request.GET.id}}&book={{request.GET.book}}">
