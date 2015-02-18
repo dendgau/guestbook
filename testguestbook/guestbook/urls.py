@@ -14,5 +14,4 @@ urlpatterns = patterns("",
 	url(r"^sign$", SignView.as_view(), name="sign"),
 	url(r"^edit$", GreetingEditView.as_view(), name="edit"),
 	url(r"^delete$", GreetingDeleteView.as_view(), name="delete"),
-	url(r"^delete_post$", "guestbook.views.post_delete_greeting", name="delete_post"),
 )
