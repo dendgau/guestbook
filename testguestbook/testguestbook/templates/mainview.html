@@ -6,8 +6,6 @@
 		<meta charset="utf-8">
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 		<title>Test GuestBook</title>
-
-		<link href="{% static "homepage.css" %}" rel="stylesheet"/>
 	</head>
 	<body>
 		<div class="main">
@@ -36,7 +34,7 @@
 						  {% endif %}
 						</td>
 						<td>
-							<strong>{{greeting.guestbook.name}}</strong>
+							<strong>{{greeting.key.parent.id}}</strong>
 						</td>
 						<td>
 							<strong>{{ greeting.content|escape }}</strong><br>
@@ -48,11 +46,11 @@
 						{% if userInfo %}
 							<td>
 							{% if isAdmin %}
-								<a href="{% url "edit" %}?id={{greeting.key.id}}">Edit</a>
-								<a href="{% url "delete" %}?id={{greeting.key.id}}">Remove</a>
+								<a href="{% url "edit" %}?id={{greeting.key.id}}&book={{greeting.key.parent.id}}">Edit</a>
+								<a href="{% url "delete" %}?id={{greeting.key.id}}&book={{greeting.key.parent.id}}">Remove</a>
 							{% else %}
 								{% if userInfo = greeting.author %}
-									<a href="{% url "edit" %}?id={{greeting.key.id}}">Edit</a>
+									<a href="{% url "edit" %}?id={{greeting.key.id}}&book={{greeting.key.parent.id}}">Edit</a>
 								{% endif %}
 							{% endif %}
 							</td>

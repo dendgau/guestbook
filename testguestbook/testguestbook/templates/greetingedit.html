@@ -6,34 +6,14 @@
 		<meta charset="utf-8">
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 		<title>Test GuestBook</title>
-
-		<link href="{% static "homepage.css" %}" rel="stylesheet"/>
 	</head>
 	<body>
-		{% for message in messages %}
-            {{message}}
-        {% endfor %}
 		<div class="main">
 			{{ form.non_field_errors }}
-			<form method="post"  action="{% url "edit" %}?id={{form.greeting_id.value}}">
+			<form method="post"  action="{% url "edit" %}?id={{request.GET.id}}&book={{request.GET.book}}">
 				{% csrf_token %}
-				{{ form.non_field_errors }}
-				{{form.greeting_id}}
-				<table>
-					<tr>
-						<td>{{form.guestbook_name.label}}<td>
-						<td>{{form.guestbook_name}}</td>
-						<td style="color:red">{{form.guestbook_name.errors}}</td>
-					</tr>
-					<tr>
-						<td>{{form.greeting_message.label}}<td>
-						<td>{{form.greeting_message}}</td>
-						<td style="color:red">{{form.greeting_message.errors}}</td>
-					</tr>
-					<tr>
-						<td><input type="submit" value="Update Edit" /></td>
-					</tr>
-				</table>
+					{{ form.as_p }}
+					<td><input type="submit" value="Update Edit" /></td>
 			</form>
 			<a href="{% url "home" %}">Home</a>
 		</div>
