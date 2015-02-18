@@ -44,14 +44,11 @@ class JSONResponseMixin(object):
         return json.dumps(context)
 
 class GreetingService(JSONResponseMixin, DetailView):
-    http_method_names = ['get', 'post']
-    
     def get(self, request, *args, **kwargs):
             greeting_id = kwargs["greeting_id"]
             guestbook_name = kwargs["guestbook_name"]
             
-            guestbook = Guestbook.query(Guestbook.name == guestbook_name).get()
-            greeting = Greeting.query(ndb.AND(Greeting.guestbook == guestbook, Greeting.key==ndb.Key("Greeting", int(greeting_id)))).get()
+            greeting = Greeting.get_greeting(guestbook_name, greeting_id)
             if greeting is None:
                 raise Http404
             
@@ -60,24 +57,23 @@ class GreetingService(JSONResponseMixin, DetailView):
                 "content" : greeting.content,
                 "date" : str(greeting.date),
                 "updated_by" : str(greeting.author),
-                "guestbook_name" : greeting.guestbook.name
+                "guestbook_name" : guestbook_name
             }
         
             return self.render_to_response(data)
     
 class GreetingDeleteService(DetailView):
-    http_method_names = ['delete']
-    
     def get(self, request, *args, **kwargs):
         greeting_id = kwargs["greeting_id"]
         guestbook_name = kwargs["guestbook_name"]
         
-        guestbook = Guestbook.query(Guestbook.name == guestbook_name).get()
-        greeting = Greeting.query(ndb.AND(Greeting.guestbook == guestbook, Greeting.key==ndb.Key("Greeting", int(greeting_id)))).get()
+        greeting = Greeting.get_greeting(guestbook_name, greeting_id)
         if greeting is None:
             raise Http404
         else:
-            key = ndb.Key("Greeting", int(greeting_id))
-            greeting = key.get()
-            greeting.key.delete()
+            dictionary = {
+                  'guestbook_name' : guestbook_name,
+                  'greeting_id' : greeting_id        
+            }
+            Greeting.delete_greeting(dictionary)
         return HttpResponse(status=204)
