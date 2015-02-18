@@ -1,0 +1,24 @@
+{% load staticfiles %}
+{% load url from future %}
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<title>Test GuestBook</title>
+	</head>
+	<body>
+		{% for message in messages %}
+            {{message}}
+        {% endfor %}
+		<div class="main">
+			{{ form.non_field_errors }}
+			<form method="post"  action="{% url "edit" %}?id={{request.GET.id}}&book={{request.GET.book}}">
+				{% csrf_token %}
+					{{ form.as_p }}
+					<td><input type="submit" value="Update Edit" /></td>
+			</form>
+			<a href="{% url "home" %}">Home</a>
+		</div>
+	</body>
+</html>
