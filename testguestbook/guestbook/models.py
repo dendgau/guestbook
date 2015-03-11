@@ -1,18 +1,17 @@
+import datetime
+
 from google.appengine.ext import ndb
 from google.appengine.api import users
-import datetime
-# We set a parent key on the 'Greetings' to ensure that they are all in the same
-# entity group. Queries across the single entity group will be consistent.
-# However, the write rate should be limited to ~1/second.
 
 DEFAULT_GUESTBOOK_NAME = 'default_guestbook'
+
 
 class Guestbook(ndb.Model):
     name = ndb.StringProperty(indexed=True)
     
     @staticmethod
     def get_guestbook_key(guestbook_name=DEFAULT_GUESTBOOK_NAME):
-		return ndb.Key('Guestbook', guestbook_name)
+        return ndb.Key('Guestbook', guestbook_name)
         
     @classmethod
     def get_guestbook_by_name(cls, guestbook_name):
@@ -29,9 +28,9 @@ class Guestbook(ndb.Model):
         guestbook = cls()
         guestbook.name = guestbook_name
         guestbook.put()
-        
         return guestbook
-		
+
+
 class Greeting(ndb.Model):
     author = ndb.UserProperty()
     content = ndb.StringProperty(indexed=False)
@@ -39,7 +38,8 @@ class Greeting(ndb.Model):
     
     @classmethod
     def get_greetings(cls, guestbook_name, count):
-        greetings = cls.query(ancestor = Guestbook.get_guestbook_key(guestbook_name)).order(-cls.date).fetch(count)
+        greetings = cls.query(ancestor=Guestbook.get_guestbook_key(guestbook_name))\
+            .order(-cls.date).fetch(count)
         return greetings
     
     @classmethod
@@ -49,7 +49,8 @@ class Greeting(ndb.Model):
     
     @classmethod
     def get_greeting(cls, guestbook_name, greeting_id):
-        greeting = cls.query(cls.key==ndb.Key("Guestbook", str(guestbook_name),"Greeting", int(greeting_id))).get()
+        greeting = cls.query(cls.key == ndb.Key("Guestbook", str(guestbook_name),
+                                                "Greeting", int(greeting_id))).get()
         return greeting
     
     @classmethod
@@ -64,7 +65,9 @@ class Greeting(ndb.Model):
     
     @classmethod
     def delete_greeting(cls, dictionary):
-        key = ndb.Key("Guestbook", dictionary["guestbook_name"], "Greeting", int(dictionary["greeting_id"]))
+        key = ndb.Key(
+            "Guestbook", dictionary["guestbook_name"],
+            "Greeting", int(dictionary["greeting_id"]))
         greeting = key.get()
         greeting.key.delete()
     
@@ -75,7 +78,7 @@ class Greeting(ndb.Model):
         if Guestbook.check_is_exist(guestbook_name) is False:
             Guestbook.add_new_book(guestbook_name)
         
-        greeting = cls(parent = Guestbook.get_guestbook_key(guestbook_name))
+        greeting = cls(parent=Guestbook.get_guestbook_key(guestbook_name))
         
         if users.get_current_user():
             greeting.author = users.get_current_user()
@@ -84,11 +87,3 @@ class Greeting(ndb.Model):
         greeting.put()
         
         return greeting
-            
-            
-            
-        
-        
-    
-    
-    
