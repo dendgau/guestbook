@@ -1,5 +1,6 @@
-from django.conf.urls import patterns, url
+# -*- coding: utf-8 -*-
 
+from django.conf.urls import patterns, url
 from guestbook.views import SignView, GreetingEditView, GreetingDeleteView
 
 from django.contrib import admin

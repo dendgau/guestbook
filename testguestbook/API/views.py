@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from django import http
 from django.http import Http404, HttpResponse
 from django.utils import simplejson as json
