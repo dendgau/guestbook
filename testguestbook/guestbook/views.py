@@ -7,10 +7,11 @@ from google.appengine.ext import ndb
 
 from django import forms
 from django.contrib import messages
+from django.views.generic import UpdateView
 from django.views.generic.edit import FormView, FormMixin
 from django.views.generic.base import TemplateView
 
-from guestbook.models import Greeting, DEFAULT_GUESTBOOK_NAME
+from guestbook.models import Greeting, AppConstants
 
 
 class SignForm(forms.Form):
@@ -43,7 +44,7 @@ class DeleteForm(forms.Form):
 
 class SignView(FormView):
     form_class = SignForm
-    template_name = "greetingform.html"
+    template_name = "greeting_form.html"
     success_url = 'sign'
     messages = {
         "greeting_create": {
@@ -54,7 +55,7 @@ class SignView(FormView):
     
     def get_initial(self):
         initial = super(SignView, self).get_initial()
-        initial["guestbook_name"] = DEFAULT_GUESTBOOK_NAME
+        initial["guestbook_name"] = AppConstants.get_default_guestbook_name()
         return initial
 
     def form_valid(self, form):
@@ -76,37 +77,23 @@ class SignView(FormView):
 
 
 class GreetingEditView(FormView):
-    template_name = "greetingedit.html"
     form_class = SignForm
+    template_name = "greeting_edit.html"
     success_url = "/"
-    messages = {
-        "greeting_create": {
-            "level": messages.SUCCESS,
-            "text": "Greeting updated."
-        },
-    }
     
     def get_initial(self):
         initial = super(GreetingEditView, self).get_initial()
 
         book_id = self.request.GET.get("book")
         greeting_id = self.request.GET.get("id")
-        greeting = Greeting.get_greeting(book_id, greeting_id)
+        greeting = Greeting.get_greeting(greeting_id, book_id)
 
         initial["greeting_message"] = greeting.content
         initial["guestbook_name"] = book_id
         return initial
 
     def form_valid(self, form):
-        if self.messages.get("greeting_create"):
-            messages.add_message(
-                self.request,
-                self.messages["greeting_create"]["level"],
-                self.messages["greeting_create"]["text"]
-            )
         self.greeting_update(form)
-        self.success_url = '/'
-        time.sleep(0.5)
         return super(GreetingEditView, self).form_valid(form)
 
     def greeting_update(self, form):
@@ -123,7 +110,7 @@ class GreetingEditView(FormView):
 
 class GreetingDeleteView(FormView):
     form_class = DeleteForm
-    template_name = "greetingdelete.html"
+    template_name = "greeting_delete.html"
     success_url = '/'
 
     def get_initial(self):
@@ -139,7 +126,6 @@ class GreetingDeleteView(FormView):
 
     def form_valid(self, form):
         self.greeting_delete(form)
-        time.sleep(0.5)
         return super(GreetingDeleteView, self).form_valid(form)
 
     def greeting_delete(self, form):
@@ -154,11 +140,11 @@ class GreetingDeleteView(FormView):
 
 
 class MainView(TemplateView):
-    template_name = "mainview.html"
+    template_name = "main_view.html"
     
     def get_context_data(self):
-        guestbook_name = self.request.GET.get('guestbook_name', DEFAULT_GUESTBOOK_NAME)
-        greetings = Greeting.get_all_greetings(20)
+        guestbook_name = self.request.GET.get('guestbook_name', AppConstants.get_default_guestbook_name())
+        greetings = Greeting.get_greetings(guestbook_name)
 
         user = users.get_current_user()
         if user:

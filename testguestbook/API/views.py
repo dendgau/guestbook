@@ -10,10 +10,6 @@ from google.appengine.ext import ndb
 from guestbook.models import Greeting
 
 
-class HttpResponseNoContent(HttpResponse):
-    status_code = 204
-
-
 class JSONResponseMixin(object):
     def render_to_response(self, context):
         return self.get_json_response(self.convert_context_to_json(context))

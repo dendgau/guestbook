@@ -9,13 +9,13 @@
 	</head>
 	<body>
 		<div class="main">
-			{{ form.non_field_errors }}
-			<form method="post"  action="{% url "edit" %}?id={{request.GET.id}}&book={{request.GET.book}}">
+			Are you sure?
+			<form method="post" action="{% url 'delete' %}?id={{request.GET.id}}&book={{request.GET.book}}">
 				{% csrf_token %}
-					{{ form.as_p }}
-					<td><input type="submit" value="Update Edit" /></td>
+				{{ form.as_p }}
+				<input name="btn_no" type="submit" value="No">
+				<input name="btn_yes" type="submit" value="Yes, I'm sure">
 			</form>
-			<a href="{% url "home" %}">Home</a>
 		</div>
 	</body>
 </html>
