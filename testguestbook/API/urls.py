@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.conf.urls import patterns, url
-from API.views import GreetingService, GreetingDeleteService
+from API.views import GreetingServiceDetail, GreetingService
 
 from django.contrib import admin
 
@@ -9,8 +9,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
                        url(r"^guestbook/(?P<guestbook_name>.+)/greeting/(?P<greeting_id>\d+)$",
-                           GreetingService.as_view()),
+                           GreetingServiceDetail.as_view(), name="greeting-service-detail"),
 
-                       url(r"^guestbook/(?P<guestbook_name>.+)/greeting/(?P<greeting_id>\d+)$",
-                           GreetingDeleteService.as_view()),
-                       )
+                       url(r"^guestbook/(?P<guestbook_name>.+)/greeting$",
+                           GreetingService.as_view(), name="greeting-service"))

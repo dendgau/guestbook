@@ -4,6 +4,7 @@ import datetime
 
 from google.appengine.ext import ndb
 from google.appengine.api import users
+from google.appengine.datastore.datastore_query import Cursor
 
 
 class AppConstants(object):
@@ -41,7 +42,13 @@ class Greeting(ndb.Model):
     author = ndb.UserProperty()
     content = ndb.StringProperty(indexed=False)
     date = ndb.DateTimeProperty(auto_now_add=True)
-    
+
+    @classmethod
+    def get_greeting_with_cursor(cls, url_safe, count=20):
+        start_cursor = Cursor(urlsafe=url_safe)
+        greetings, next_cursor, is_more = cls.query().fetch_page(count, start_cursor=start_cursor)
+        return greetings, next_cursor, is_more
+
     @classmethod
     def get_greetings(cls, guestbook_name=AppConstants.get_default_guestbook_name(), count=20):
         greetings = cls.query(ancestor=Guestbook.get_guestbook_key(guestbook_name))\
