@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import time
-
 from google.appengine.api import users
 from google.appengine.ext import ndb
 

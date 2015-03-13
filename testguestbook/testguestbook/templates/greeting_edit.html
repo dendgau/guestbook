@@ -10,9 +10,11 @@
 	<body>
 		<div class="main">
 			{{ form.non_field_errors }}
-			<form method="post"  action="{% url 'edit' %}?id={{request.GET.id}}&book={{request.GET.book}}">
+			<form method="POST">
                 {% csrf_token %}
                 {{ form.as_p }}
+                <input type="hidden" name="greeting_id" value="{{request.GET.id}}">
+                <input type="hidden" name="guestbook_name" value="{{request.GET.book}}">
                 <input type="submit" value="Update Edit" />
 			</form>
 			<a href="{% url 'home' %}">Home</a>
