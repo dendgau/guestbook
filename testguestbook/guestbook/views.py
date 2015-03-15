@@ -16,7 +16,7 @@ class SignForm(forms.Form):
     guestbook_name = forms.CharField(
         label="Guest_book Name",
         max_length=20,
-        required=True,
+        required=False,
         widget=forms.TextInput()
     )
     greeting_message = forms.CharField(

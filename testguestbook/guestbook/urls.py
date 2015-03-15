@@ -27,10 +27,14 @@ urlpatterns = patterns('',
                            name="test-greeting-detail"),
 
                        url(r"^test-greeting-edit",
-                           GreetingServiceDetail.as_view(),
+                           TemplateView.as_view(template_name="test_greeting_edit.html"),
                            name="test-greeting-edit"),
 
                        url(r"^test-get-greetings",
                            TemplateView.as_view(template_name="test_get_greetings.html"),
                            name="test-get-greetings"),
+
+                       url(r"^test-greeting-add",
+                           TemplateView.as_view(template_name="test_greeting_add.html"),
+                           name="test-greeting-add"),
                        )

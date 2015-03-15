@@ -10,29 +10,25 @@
         <label>Guestbook Name:</label>
         <input type="text" name="guestbook_id" value="default_guestbook"><br>
 
-        <label>Greeting ID (example: 5348024557502464):</label>
-        <input type="text" name="greeting_id"><br>
-
         <label>Content</label>
         <textarea name="greeting_content"></textarea><br>
 
-        <button id="btn_edit_greeting">PUT</button>
+        <button id="btn_edit_greeting">POST</button>
         <div class="result"></div>
         <script language="JavaScript" src="/javascript/jquery-1.11.2.min.js"></script>
         <script language="JavaScript" src="/javascript/setting_cookie.js"></script>
         <script>
             $("body").on("click", "#btn_edit_greeting", function(){
-                var greeting_id = $("input[name='greeting_id']").val();
                 var guestbook_name = $("input[name='guestbook_id']").val();
-                var url = '{% url "greeting-service-detail" guestbook_name="0" greeting_id=1 %}';
+                var url = '{% url "greeting-service" guestbook_name="0" %}';
                 url = url.replace("0", guestbook_name);
-                url = url.replace("1", greeting_id);
                 $.ajax({
-                    type: 'PUT',
+                    type: 'POST',
                     url: url,
-                    data: JSON.stringify({
+                    data: {
+                        "guestbook_name" : guestbook_name,
                         "greeting_message" : $("textarea[name='greeting_content']").val()
-                    }),
+                    },
                     success: function(g) {
                     }
                 });

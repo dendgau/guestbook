@@ -25,7 +25,10 @@ class JSONResponseMixin(object):
         return json.dumps(context)
 
 
-class GreetingService(JSONResponseMixin, DetailView):
+class GreetingService(JSONResponseMixin, FormView):
+    form_class = SignForm
+    success_url = '/'
+
     def get(self, *args, **kwargs):
         url_safe = self.request.GET.get("cursor", None)
         guestbook_name = kwargs.get("guestbook_name", AppConstants.get_default_guestbook_name())
@@ -48,37 +51,57 @@ class GreetingService(JSONResponseMixin, DetailView):
 
         return self.render_to_response(data)
 
+    def form_valid(self, form):
+        new_greeting = self.greeting_create(form)
+        if new_greeting:
+            return HttpResponse(status=204)
+        else:
+            return HttpResponse(status=404)
+
+    def form_invalid(self, form):
+        return HttpResponse(status=400)
+
+    def greeting_create(self, form):
+        dictionary = {
+            'guestbook_name': form.cleaned_data["guestbook_name"],
+            'content': form.cleaned_data["greeting_message"]
+        }
+        return Greeting.put_from_dict(dictionary)
+
 
 class GreetingServiceDetail(JSONResponseMixin, FormView):
     form_class = SignForm
-    template_name = "test_greeting_edit.html"
     success_url = '/'
 
-    def get_initial(self):
-        initial = super(GreetingServiceDetail, self).get_initial()
-
-        book_id = self.request.GET.get("book")
-        greeting_id = self.request.GET.get("id")
-        greeting = Greeting.get_greeting(greeting_id, book_id)
-
-        initial["greeting_message"] = greeting.content
-        initial["guestbook_name"] = book_id
-        return initial
+    def put(self, request, *args, **kwargs):
+        request.POST = json.loads(request.body)
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
 
     def form_valid(self, form):
-        self.greeting_update(form)
-        return super(GreetingServiceDetail, self).form_valid(form)
+        greeting = self.greeting_update(form)
+        if greeting:
+            return HttpResponse(status=204)
+        else:
+            return HttpResponse(status=404)
+
+    def form_invalid(self, form):
+        return HttpResponse(status=400)
 
     def greeting_update(self, form):
-        greeting_id = self.request.GET.get("id")
-        book_id = self.request.GET.get("book")
+        greeting_id = self.kwargs.get("greeting_id")
+        book_id = self.kwargs.get("guestbook_name")
         greeting_content = form.cleaned_data["greeting_message"]
         dictionary = {
             'guestbook_name': book_id,
             'greeting_id': greeting_id,
             'content': greeting_content
         }
-        Greeting.update_greeting(dictionary)
+        return Greeting.update_greeting(dictionary)
 
     def get(self, request, *args, **kwargs):
         greeting_id = kwargs.get("greeting_id")
