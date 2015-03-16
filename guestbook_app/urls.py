@@ -22,25 +22,9 @@ urlpatterns = patterns('',
                            GreetingDeleteView.as_view(),
                            name="delete"),
 
-                       url(r"^test-greeting-detail",
-                           TemplateView.as_view(template_name="test_greeting_detail.html"),
-                           name="test-greeting-detail"),
-
-                       url(r"^test-greeting-edit",
-                           TemplateView.as_view(template_name="test_greeting_edit.html"),
-                           name="test-greeting-edit"),
-
-                       url(r"^test-get-greetings",
-                           TemplateView.as_view(template_name="test_get_greetings.html"),
-                           name="test-get-greetings"),
-
-                       url(r"^test-greeting-add",
-                           TemplateView.as_view(template_name="test_greeting_add.html"),
-                           name="test-greeting-add"),
-
-                       url(r"^guestbook_app/(?P<guestbook_name>.+)/greeting/(?P<greeting_id>\d+)$",
+                       url(r"^guestbook/(?P<guestbook_name>.+)/greeting/(?P<greeting_id>\d+)$",
                            GreetingServiceDetail.as_view(), name="greeting-service-detail"),
 
-                       url(r"^guestbook_app/(?P<guestbook_name>.+)/greeting$",
+                       url(r"^guestbook/(?P<guestbook_name>.+)/greeting$",
                            GreetingService.as_view(), name="greeting-service"))
 
