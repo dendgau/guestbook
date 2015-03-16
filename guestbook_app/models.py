@@ -81,13 +81,18 @@ class Greeting(ndb.Model):
     def delete_greeting(cls, dictionary):
         try:
             greeting_id = int(dictionary["greeting_id"])
-            key = ndb.Key(
-                "Guestbook", dictionary["guestbook_name"],
-                "Greeting", greeting_id)
+            greeting = cls.get_greeting(greeting_id, dictionary["guestbook_name"])
 
-            greeting = key.get()
-            greeting.key.delete()
-            return True
+            if greeting is None:
+                return False
+            else:
+                key = ndb.Key(
+                    "Guestbook", dictionary["guestbook_name"],
+                    "Greeting", greeting_id)
+
+                greeting = key.get()
+                greeting.key.delete()
+                return True
         except ValueError:
             raise ValueError("Khong the ep kieu")
     

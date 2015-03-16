@@ -8,8 +8,8 @@ from django.views.generic.edit import FormView
 
 from google.appengine.ext import ndb
 
-from guestbook.models import Greeting, AppConstants
-from guestbook.views import SignForm
+from guestbook_app.models import Greeting, AppConstants
+from guestbook_app.views import SignForm
 
 
 class JSONResponseMixin(object):
@@ -105,7 +105,7 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 
     def get(self, request, *args, **kwargs):
         greeting_id = kwargs.get("greeting_id")
-        guestbook_name = kwargs.get("guestbook_name", AppConstants.get_default_guestbook_name())
+        guestbook_name = kwargs.get("guestbook_name")
 
         greeting = Greeting.get_greeting(greeting_id, guestbook_name)
         if greeting is None:
@@ -123,16 +123,14 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 
     def delete(self, *args, **kwargs):
         greeting_id = kwargs.get("greeting_id")
-        guestbook_name = kwargs.get("guestbook_name", AppConstants.get_default_guestbook_name())
+        guestbook_name = kwargs.get("guestbook_name")
+        dictionary = {
+            'guestbook_name': guestbook_name,
+            'greeting_id': greeting_id
+        }
+        is_delete_success = Greeting.delete_greeting(dictionary)
 
-        greeting = Greeting.get_greeting(greeting_id, guestbook_name)
-        if greeting is None:
-            return HttpResponse(status=404)
-        else:
-            dictionary = {
-                'guestbook_name': guestbook_name,
-                'greeting_id': greeting_id
-            }
-            Greeting.delete_greeting(dictionary)
-
+        if is_delete_success is True:
             return HttpResponse(status=204)
+        else:
+            return HttpResponse(status=404)

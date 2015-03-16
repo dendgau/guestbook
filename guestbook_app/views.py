@@ -9,7 +9,7 @@ from django.views.generic import UpdateView
 from django.views.generic.edit import FormView, FormMixin
 from django.views.generic.base import TemplateView
 
-from guestbook.models import Greeting, AppConstants
+from guestbook_app.models import Greeting, AppConstants
 
 
 class SignForm(forms.Form):
@@ -31,11 +31,13 @@ class DeleteForm(forms.Form):
     guestbook_name = forms.CharField(
         label="Guestbook Name",
         max_length=20,
+        required=False,
         widget=forms.HiddenInput()
     )
     greeting_id = forms.CharField(
         label="Greeting ID",
         max_length=50,
+        required=False,
         widget=forms.HiddenInput()
     )
 
@@ -82,12 +84,12 @@ class GreetingEditView(FormView):
     def get_initial(self):
         initial = super(GreetingEditView, self).get_initial()
 
-        book_id = self.request.GET.get("book")
-        greeting_id = self.request.GET.get("id")
-        greeting = Greeting.get_greeting(greeting_id, book_id)
+        guestbook_name = self.request.GET.get("guestbook_name")
+        greeting_id = self.request.GET.get("greeting_id")
+        greeting = Greeting.get_greeting(greeting_id, guestbook_name)
 
         initial["greeting_message"] = greeting.content
-        initial["guestbook_name"] = book_id
+        initial["guestbook_name"] = guestbook_name
         return initial
 
     def form_valid(self, form):
@@ -95,11 +97,11 @@ class GreetingEditView(FormView):
         return super(GreetingEditView, self).form_valid(form)
 
     def greeting_update(self, form):
-        greeting_id = self.request.GET.get("id")
-        book_id = self.request.GET.get("book")
+        greeting_id = self.request.GET.get("greeting_id")
+        guestbook_name = form.cleaned_data["guestbook_name"]
         greeting_content = form.cleaned_data["greeting_message"]
         dictionary = {
-            'guestbook_name': book_id,
+            'guestbook_name': guestbook_name,
             'greeting_id': greeting_id,
             'content': greeting_content
         }
@@ -114,11 +116,11 @@ class GreetingDeleteView(FormView):
     def get_initial(self):
         initial = super(GreetingDeleteView, self).get_initial()
 
-        book_id = self.request.GET.get("book")
-        greeting_id = self.request.GET.get("id")
+        guestbook_name = self.request.GET.get("guestbook_name")
+        greeting_id = self.request.GET.get("greeting_id")
 
         initial["greeting_id"] = greeting_id
-        initial["guestbook_name"] = book_id
+        initial["guestbook_name"] = guestbook_name
 
         return initial
 
@@ -128,8 +130,8 @@ class GreetingDeleteView(FormView):
 
     def greeting_delete(self, form):
         if self.request.POST.get("btn_yes"):
-            greeting_id = self.request.GET.get("id")
-            guestbook_name = self.request.GET.get("book")
+            greeting_id = form.cleaned_data["greeting_id"]
+            guestbook_name = form.cleaned_data["guestbook_name"]
             dictionary = {
                 'greeting_id': greeting_id,
                 'guestbook_name': guestbook_name

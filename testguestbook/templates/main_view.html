@@ -45,11 +45,11 @@
 						{% if userInfo %}
 							<td>
 							{% if isAdmin %}
-								<a href="{% url 'edit' %}?id={{greeting.key.id}}&book={{greeting.key.parent.id}}">Edit</a>
-								<a href="{% url 'delete' %}?id={{greeting.key.id}}&book={{greeting.key.parent.id}}">Remove</a>
+								<a href="{% url 'edit' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Edit</a>
+								<a href="{% url 'delete' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Remove</a>
 							{% else %}
 								{% if userInfo = greeting.author %}
-									<a href="{% url 'edit' %}?id={{greeting.key.id}}&book={{greeting.key.parent.id}}">Edit</a>
+									<a href="{% url 'edit' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Edit</a>
 								{% endif %}
 							{% endif %}
 							</td>
