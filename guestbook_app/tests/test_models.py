@@ -51,7 +51,6 @@ class TestClassGreeting(TestBassClass):
             next_cursor is not None and is_more is True
         )
 
-
     def test_get_greetings(self):
         for num in range(0, 25, 1):
             dictionary = {
