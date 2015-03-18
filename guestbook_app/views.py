@@ -5,8 +5,7 @@ from google.appengine.ext import ndb
 
 from django import forms
 from django.contrib import messages
-from django.views.generic import UpdateView
-from django.views.generic.edit import FormView, FormMixin
+from django.views.generic.edit import FormView
 from django.views.generic.base import TemplateView
 
 from guestbook_app.models import Greeting, AppConstants
