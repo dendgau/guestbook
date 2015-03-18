@@ -47,7 +47,16 @@ class Greeting(ndb.Model):
     def get_greeting_with_cursor(cls, url_safe, count=20):
         start_cursor = Cursor(urlsafe=url_safe)
         greetings, next_cursor, is_more = cls.query().fetch_page(count, start_cursor=start_cursor)
-        return greetings, next_cursor, is_more
+
+        greeting_json = [
+            {
+                "greeting_auth": greeting.author,
+                "greeting_content": greeting.content,
+                "greeting_date": str(greeting.date)
+            } for greeting in greetings
+        ]
+
+        return greeting_json, next_cursor, is_more
 
     @classmethod
     def get_greetings(cls, guestbook_name=AppConstants.get_default_guestbook_name(), count=20):
