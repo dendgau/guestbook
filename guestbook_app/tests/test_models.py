@@ -25,7 +25,7 @@ class TestClassGuestbook(TestBassClass):
     def test_get_guestbook_by_name(self):
         guestbook_name_before = "test_get_by_name"
         Guestbook.add_new_book(guestbook_name_before)
-        guestbook_name_after = (Guestbook.get_guestbook_by_name(guestbook_name_before)).nameh /hasattr(ssss)
+        guestbook_name_after = (Guestbook.get_guestbook_by_name(guestbook_name_before)).name
         assert guestbook_name_after == str(guestbook_name_before)
 
     def test_check_is_exist(self):
