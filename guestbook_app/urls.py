@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import patterns, url, include
+from django.conf.urls import patterns, url
 from guestbook_app.views import SignView, GreetingEditView, GreetingDeleteView
 from guestbook_app.api import GreetingServiceDetail, GreetingService
-from django.views.generic import TemplateView
 
 from django.contrib import admin
 
