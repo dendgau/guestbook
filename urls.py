@@ -8,5 +8,6 @@ from guestbook_app.views import MainView
 admin.autodiscover()
 
 urlpatterns = patterns('',
-                       url(r"^$", MainView.as_view(), name="home"),
-                       url(r'^guestbook_app/', include('guestbook_app.urls')))
+	url(r"^$", MainView.as_view(), name="home"),
+	url(r'^guestbook_app/', include('guestbook_app.urls'))
+)

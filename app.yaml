@@ -11,11 +11,11 @@ handlers:
 
 - url: /.*
   script: main.application
-  
+
 libraries:
 
 - name: django
   version: "1.4"
   
 env_variables:
-  DJANGO_SETTINGS_MODULE: 'guestbook_training.settings'
+  DJANGO_SETTINGS_MODULE: 'settings'

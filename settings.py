@@ -59,7 +59,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.messages.context_processors.messages"  
 )   
 
-ROOT_URLCONF = 'guestbook_training.urls'
+ROOT_URLCONF = 'urls'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 

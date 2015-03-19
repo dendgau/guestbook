@@ -23,7 +23,7 @@
 					<tr>
 						<td>
 						  {% if greeting.author.nickname %}
-							{% if userInfo and userInfo == greeting.author  %}
+							{% if userInfo and userInfo == greeting.author %}
 								<strong>You</strong> wrote
 							{% else %}
 								<strong>{{ greeting.author }}</strong> wrote
@@ -41,7 +41,6 @@
 						<td>	
 							{{ greeting.date}}
 						</td>
-						
 						{% if userInfo %}
 							<td>
 							{% if isAdmin %}
