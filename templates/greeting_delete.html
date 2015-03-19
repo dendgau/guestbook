@@ -1,0 +1,21 @@
+{% load staticfiles %}
+{% load url from future %}
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<title>Test GuestBook</title>
+	</head>
+	<body>
+		<div class="main">
+			Are you sure?
+			<form method="POST">
+				{% csrf_token %}
+				{{ form.as_p }}
+				<input name="btn_no" type="submit" value="No">
+				<input name="btn_yes" type="submit" value="Yes, I'm sure">
+			</form>
+		</div>
+	</body>
+</html>
