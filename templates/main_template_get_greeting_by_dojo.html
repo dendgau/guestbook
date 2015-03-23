@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+	<h3>TEST GET GREETING DETAIL</h3>
+	<div id="result">
+
+    </div>
+	<script>
+        var base = location.href.split("/");
+		base.pop();
+		if (base.length > 3){
+			base.splice(base.length - 1, 1);
+		}
+		base = base.join("/")
+
+        //config dojoConfig
+        var dojoConfig  = (function(){
+			return {
+				async: true,
+				isDebug: true,
+				packages: [{
+					name: "myApp",
+					location: base + "/static/js/myApp"
+				}]
+			};
+		})();
+    </script>
+	<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.3/dojo/dojo.js"></script>
+	<script>
+        require([
+			'dojo/_base/config',
+			'dojo/_base/window',
+			'dojo/parser',
+			'dojo/ready',
+			'myApp/GuestbookStore',
+			'myApp/view/Greeting',
+			"dojo/dom",
+            "dojo/domReady!"
+		], function(config, win, parser, ready, _GuestbookStore, _Greeting, dom) {
+			ready(function() {
+				if (!config.parseOnLoad) {
+                    alert(1);
+					parser.parse();
+				}
+
+				_GuestbookStore.access_api_get_greeting_detail().then(function(data){
+					var result = dom.byId("result");
+					var greeting = new _Greeting(data);
+					greeting.placeAt(result);
+					greeting.startup();
+				})
+			});
+		});
+    </script>
+</body>
+</html>
