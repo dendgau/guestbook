@@ -49,8 +49,26 @@ define([
             alert("Put greeting");
         },
 
-        access_api_post_greeting: function(){
-            alert("Post greeting");
+        access_api_post_greeting: function(guestbook_name, greeting_message){
+            var deferred = new _Deferred();
+
+            dojo.xhrPost({
+                url: base+"/guestbook_app/guestbook/"+guestbook_name+"/greeting/",
+                handleAs: "json",
+                content: {
+                    "guestbook_name": guestbook_name,
+                    "greeting_message": greeting_message
+                },
+                headers: {"X-CSRFToken": cookie("csrftoken")},
+                load: function(data){
+                    deferred.resolve("Insert Success")
+                },
+                error: function(error){
+                    return deferred.reject(error);
+                }
+            });
+
+            return deferred.promise;
         },
 
         access_api_delete_greeting: function(guestbook_name, greeting){

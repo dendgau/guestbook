@@ -11,12 +11,13 @@ define([
     "dijit/form/Button",
     "dijit/form/Form",
     "dijit/form/TextBox",
+    "dijit/form/Textarea",
     "dojo/dom",
     "dojo/_base/array",
     "dijit/registry",
     "dojo/query"
 ], function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template,
-            _GuestbookStore, _Greeting, baseFx, lang, _button, _form, _textbox, dom, array, registry,query){
+            _GuestbookStore, _Greeting, baseFx, lang, _button, _form, _textbox, _textarea, dom, array, registry,query){
 
         return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -66,6 +67,17 @@ define([
 				}, function(error){
 					alert(error);
                 });
+            },
+
+            _add_new_greeting: function(){
+                var new_content = registry.byId("new_greeting_content");
+                _GuestbookStore.access_api_post_greeting(this.guestbook_name,
+                    new_content.get("value")).then(function(data){
+                        alert(data);
+                        this._load_greeting_from_guestbook();
+                    }, function(error){
+                        alert(error);
+                    })
             }
         });
 });
