@@ -1,0 +1,24 @@
+<div style="float:left">
+	<span style="font-size: 20px; float:left">
+        You are in:
+        <strong>${guestbook_name}</strong>
+    </span><br>
+	<div style="float:left; width: 100%; margin-top: 10px; border-bottom: thin solid black;
+	margin-bottom: 20px; padding-bottom: 20px">
+		<input id="textbox_switch" data-dojo-type="dijit/form/TextBox" />
+		<input id="button_switch" data-dojo-attach-event="click: _change_guestbook"
+               name="submitForm"
+			   type="submit" value="Switch">
+	</div>
+    <div style="float:left; width: 100%; margin-top: 10px; border-bottom: thin solid black;
+    margin-bottom: 20px; padding-bottom: 20px">
+		<textarea style="width: 96%; height: 100px; padding: 8px" id="new_greeting_content"
+                ></textarea><br>ddd
+        <input id="button_create_new_greeting" data-dojo-attach-event="click: _add_new_greeting"
+               name="submitForm"
+			   type="submit" value="Add New Greeting">
+    </div>
+    <div id="greetings" style="float:left; width: 100%">
+
+    </div>
+</div>

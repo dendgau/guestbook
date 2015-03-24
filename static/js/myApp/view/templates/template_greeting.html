@@ -1,8 +1,14 @@
-<div>
+<div class="${baseClass}" data-dojo-attach-point="${baseClass}Node" style="border: thin solid
+black;
+border-radius: 5px;
+padding: 10px;
+line-height: 30px; margin-bottom: 20px">
 	<span data-dojo-attach-point="nameNode"><strong>GreetingID:</strong> ${greeting_id}</span><br>
-    <span data-dojo-attach-point="nameAuthor"><strong>Updated by:</strong> ${updated_by}</span><br>
+    <span data-dojo-attach-point="authorNode"><strong>Updated by:</strong> ${author}</span><br>
     <span data-dojo-attach-point="dateNode"><strong>Date:</strong> ${date}</span></br>
 	<span data-dojo-attach-point="contentNode"><strong>Content:</strong> ${!content}</span><br>
-    <!--<button data-dojo-type="dijit/form/Button" data-dojo-attach-point="nodeDelete"
-            data-dojo-attach-event="delete">Delete</button>-->
+    <span><strong>Tool:</strong></span>
+    <button data-dojo-attach-point="nodeDeleteButton"
+            data-dojo-attach-event="click: delete">Delete</button>
+    <button>Edit</button>
 </div>

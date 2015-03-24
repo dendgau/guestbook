@@ -31,8 +31,9 @@ class GreetingService(JSONResponseMixin, FormView):
 	# API GET list greetings
 	def get(self, *args, **kwargs):
 		url_safe = self.request.GET.get("cursor", None)
-		guestbook_name = kwargs.get("guestbook_name", AppConstants.get_default_guestbook_name())
-		greetings, next_cursor, is_more = Greeting.get_greeting_with_cursor(url_safe, 1)
+		guestbook_name = kwargs.get("guestbook_name")
+		greetings, next_cursor, is_more = Greeting.get_greeting_with_cursor(url_safe,
+			guestbook_name, 20)
 
 		data = {
 			"guestbook_name": guestbook_name,

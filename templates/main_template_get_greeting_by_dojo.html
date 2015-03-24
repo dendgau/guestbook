@@ -5,8 +5,7 @@
     <title></title>
 </head>
 <body>
-	<h3>TEST GET GREETING DETAIL</h3>
-	<div id="result">
+	<div id="result" style="padding: 20px; width: 650px">
 
     </div>
 	<script>
@@ -37,22 +36,19 @@
 			'dojo/parser',
 			'dojo/ready',
 			'myApp/GuestbookStore',
-			'myApp/view/Greeting',
+			'myApp/view/Guestbook',
 			"dojo/dom",
+			"dojo/_base/array",
             "dojo/domReady!"
-		], function(config, win, parser, ready, _GuestbookStore, _Greeting, dom) {
+		], function(config, win, parser, ready, _GuestbookStore, _Guestbook, dom, array) {
 			ready(function() {
 				if (!config.parseOnLoad) {
-                    alert(1);
 					parser.parse();
 				}
 
-				_GuestbookStore.access_api_get_greeting_detail().then(function(data){
-					var result = dom.byId("result");
-					var greeting = new _Greeting(data);
-					greeting.placeAt(result);
-					greeting.startup();
-				})
+                var guestbook = new _Guestbook({"guestbook_name": "default_guestbook"});
+				var result = dom.byId("result");
+				guestbook.placeAt(result);
 			});
 		});
     </script>
