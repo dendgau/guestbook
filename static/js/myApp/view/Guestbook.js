@@ -15,9 +15,9 @@ define([
     "dojo/dom",
     "dojo/_base/array",
     "dijit/registry",
-    "dojo/query"
+    "dojo/query",
 ], function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template,
-            _GuestbookStore, _Greeting, baseFx, lang, _button, _form, _textbox, _textarea, dom, array, registry,query){
+            _GuestbookStore, _Greeting, baseFx, lang, _button, _form, _textbox, _textarea, dom, array, registry, query){
 
         return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -32,7 +32,6 @@ define([
                 var input_switch = registry.byId("textbox_switch");
                 input_switch.set("value", this.guestbook_name);
                 this._load_greeting_from_guestbook();
-
                 this.inherited(arguments);
             },
 
@@ -71,10 +70,11 @@ define([
 
             _add_new_greeting: function(){
                 var new_content = registry.byId("new_greeting_content");
+                var me = this;
                 _GuestbookStore.access_api_post_greeting(this.guestbook_name,
                     new_content.get("value")).then(function(data){
                         alert(data);
-                        this._load_greeting_from_guestbook();
+                        me._load_greeting_from_guestbook();
                     }, function(error){
                         alert(error);
                     })

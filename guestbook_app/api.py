@@ -71,7 +71,8 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 
 	# API put (update) greeting
 	def put(self, request, *args, **kwargs):
-		request.POST = json.loads(request.body)
+		a = request.body
+		request.POST = str(request.body)
 		form_class = self.get_form_class()
 		form = self.get_form(form_class)
 		if form.is_valid():

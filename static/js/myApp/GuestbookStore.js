@@ -3,8 +3,9 @@ define([
     'dojo/_base/xhr',
     'dojo/request/xhr',
     'dojo/cookie',
+    "dojo/json",
     'dojo/domReady!'
-], function(_Deferred, xhr, xhrRequest, cookie){
+], function(_Deferred, xhr, xhrRequest, cookie, JSON){
     return {
         access_api_get_greeting_detail: function(guestbook_name, greeting){
             var deferred = new _Deferred();
@@ -45,15 +46,33 @@ define([
             return deferred.promise;
         },
 
-        access_api_put_greeting: function(){
-            alert("Put greeting");
+        access_api_put_greeting: function(guestbook_name, greeting, content){
+            var deferred = new _Deferred();
+
+            dojo.xhrPut({
+                url: base+"/guestbook_app/guestbook/"+guestbook_name+"/greeting/"+greeting,
+                handleAs: "json",
+                content: {
+                    "guestbook_name": guestbook_name,
+                    "greeting_message": content
+                },
+                headers: {"X-CSRFToken": cookie("csrftoken")},
+                load: function(data){
+                    deferred.resolve("Update Success");
+                },
+                error: function(error){
+                    return deferred.reject(error);
+                }
+            });
+
+            return deferred.promise;
         },
 
         access_api_post_greeting: function(guestbook_name, greeting_message){
             var deferred = new _Deferred();
 
             dojo.xhrPost({
-                url: base+"/guestbook_app/guestbook/"+guestbook_name+"/greeting/",
+                url: base+"/guestbook_app/guestbook/"+guestbook_name+"/greeting",
                 handleAs: "json",
                 content: {
                     "guestbook_name": guestbook_name,
