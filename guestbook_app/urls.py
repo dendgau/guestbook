@@ -18,6 +18,4 @@ urlpatterns = patterns('',
 					GreetingServiceDetail.as_view(), name="greeting-service-detail"),
 	url(r"^guestbook/(?P<guestbook_name>.+)/greeting$",
 					GreetingService.as_view(), name="greeting-service"),
-	url(r"^test-get-greeting-by-dojo$",
-					TemplateView.as_view(template_name="main_template_get_greeting_by_dojo.html"),
-					name="test-get-greeting-by-dojo$"),)
+	url(r"^dojo$", TemplateView.as_view(template_name="dojo_template.html"), name="dojo"),)
