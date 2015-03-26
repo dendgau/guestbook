@@ -23,6 +23,8 @@ define([
         return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
             templateString: template,
+
+            _guestbook_store: null,
             baseClass: "widget_greeting",
             guestbook_name: "",
             greeting_id: "",
@@ -40,6 +42,8 @@ define([
                 }else{
                     this.author = "Anonymous Person";
                 }
+                this._guestbook_store = data.guestbook_store;
+                console.log(data.guestbook_store);
             },
 
             postCreate: function(data){
@@ -47,9 +51,9 @@ define([
             },
 
             delete: function(){
-                _GuestbookStore.access_api_delete_greeting(this.guestbook_name, this.greeting_id)
+                this._guestbook_store.access_api_delete_greeting(this.guestbook_name, this.greeting_id)
                     .then(function(data){
-                    alert(data);
+                    alert("Delete Success");
                 }, function(err){
                     alert(err);
                 });
@@ -58,7 +62,7 @@ define([
 
             _edit_greeting_event: function(){
                 var me = this;
-                _GuestbookStore.access_api_get_greeting_detail(
+                this._guestbook_store.access_api_get_greeting_detail(
                     this.guestbook_name, this.greeting_id
                 ).then(function(data){
                     var formNode = me.editFormNode;
@@ -70,13 +74,15 @@ define([
             },
 
             _update_greeting: function(){
+                this.content = this.edit_greeting_content.value
                 var me = this;
-                console.log(this)
-                _GuestbookStore.access_api_put_greeting(
-                    this.guestbook_name, this.greeting_id,
-                    this.content = this.edit_greeting_content.value
+                this._guestbook_store.access_api_put_greeting(
+                    this.guestbook_name, this.greeting_id, this.content
                 ).then(function(data){
-                    alert(data);
+                    alert("Update Success");
+                    me.contentNode.innerHTML = me.content
+                    var formNode = me.editFormNode;
+                    domStyle.set(formNode, {"display": "none"});
                 }, function(error){
                     alert(error);
                 })

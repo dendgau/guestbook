@@ -84,6 +84,8 @@ class Greeting(ndb.Model):
 		if greeting:
 			greeting.content = dictionary["content"]
 			greeting.updated_date = datetime.datetime.now()
+			if users.get_current_user():
+				greeting.author = users.get_current_user()
 			greeting.put()
 
 		return greeting

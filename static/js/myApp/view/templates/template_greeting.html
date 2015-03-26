@@ -2,10 +2,11 @@
 black; border-radius: 5px; padding: 10px; line-height: 30px; margin-bottom: 20px; float:left;
 width: 100%">
     <div style="float:left; width: 100%">
-		<span data-dojo-attach-point="nameNode"><strong>GreetingID:</strong> ${greeting_id}</span><br>
-		<span data-dojo-attach-point="authorNode"><strong>Updated by:</strong> ${author}</span><br>
-		<span data-dojo-attach-point="dateNode"><strong>Date:</strong> ${date}</span></br>
-		<span data-dojo-attach-point="contentNode"><strong>Content:</strong> ${!content}</span><br>
+		<strong>GreetingID:</strong><span data-dojo-attach-point="nameNode">
+        ${greeting_id}</span><br>
+		<strong>Updated by:</strong><span data-dojo-attach-point="authorNode"> ${author}</span><br>
+		<strong>Date:</strong><span data-dojo-attach-point="dateNode"> ${date}</span></br>
+		<strong>Content:</strong><span data-dojo-attach-point="contentNode"> ${!content}</span><br>
 		<span><strong>Tool:</strong></span>
 		<button data-dojo-attach-point="nodeDeleteButton"
 				data-dojo-attach-event="click: delete">Delete</button>

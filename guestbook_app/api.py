@@ -4,6 +4,7 @@ from django import http
 from django.http import Http404, HttpResponse
 from django.utils import simplejson as json
 from django.views.generic.edit import FormView
+from django.http import QueryDict
 
 from google.appengine.ext import ndb
 
@@ -44,6 +45,23 @@ class GreetingService(JSONResponseMixin, FormView):
 
 		return self.render_to_response(data)
 
+	def post(self, request, *args, **kwargs):
+		if self.request.POST:
+			try:
+				json_object = json.loads(self.request.body)
+			except ValueError:
+				self.request.POST = QueryDict(self.request.body)
+
+			else:
+				self.request.POST = json_object
+
+		form_class = self.get_form_class()
+		form = self.get_form(form_class)
+		if form.is_valid():
+			return self.form_valid(form)
+		else:
+			return self.form_invalid(form)
+
 	# API POST greeting when form valid
 	def form_valid(self, form):
 		new_greeting = self.greeting_create(form)
@@ -71,8 +89,14 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 
 	# API put (update) greeting
 	def put(self, request, *args, **kwargs):
-		a = request.body
-		request.POST = str(request.body)
+		if self.request.POST:
+			try:
+				json_object = json.loads(self.request.body)
+			except ValueError:
+				self.request.POST = QueryDict(self.request.body)
+
+			else:
+				self.request.POST = json_object
 		form_class = self.get_form_class()
 		form = self.get_form(form_class)
 		if form.is_valid():
