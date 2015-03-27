@@ -1,23 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css"
+		  href="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dijit/themes/soria/soria.css" />
+	<title></title>
 </head>
 <body>
 	<div id="result" style="padding: 20px; width: 650px">
 
-    </div>
+	</div>
 	<script>
-        var base = location.href.split("/");
+		var base = location.href.split("/");
 		base.pop();
 		if (base.length > 3){
 			base.splice(base.length - 1, 1);
 		}
 		base = base.join("/")
 
-        //config dojoConfig
-        var dojoConfig  = (function(){
+		//config dojoConfig
+		var dojoConfig  = (function(){
 			return {
 				async: true,
 				isDebug: true,
@@ -27,30 +29,11 @@
 				}]
 			};
 		})();
-    </script>
+	</script>
 	<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.3/dojo/dojo.js"></script>
 	<script>
-        require([
-			'dojo/_base/config',
-			'dojo/_base/window',
-			'dojo/parser',
-			'dojo/ready',
-			'myApp/GuestbookStore',
-			'myApp/view/Guestbook',
-			"dojo/dom",
-			"dojo/_base/array",
-            "dojo/domReady!"
-		], function(config, win, parser, ready, _GuestbookStore, _Guestbook, dom, array) {
-			ready(function() {
-				if (!config.parseOnLoad) {
-					parser.parse();
-				}
+		require(['myApp/App']);
+	</script>
 
-                var guestbook = new _Guestbook({"guestbook_name": "default_guestbook"});
-				var result = dom.byId("result");
-				guestbook.placeAt(result);
-			});
-		});
-    </script>
 </body>
 </html>

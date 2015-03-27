@@ -89,14 +89,12 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 
 	# API put (update) greeting
 	def put(self, request, *args, **kwargs):
-		if self.request.POST:
-			try:
-				json_object = json.loads(self.request.body)
-			except ValueError:
-				self.request.POST = QueryDict(self.request.body)
-
-			else:
-				self.request.POST = json_object
+		try:
+			json_object = json.loads(self.request.body)
+		except ValueError:
+			self.request.POST = QueryDict(self.request.body)
+		else:
+			self.request.POST = json_object
 		form_class = self.get_form_class()
 		form = self.get_form(form_class)
 		if form.is_valid():

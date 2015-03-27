@@ -1,24 +1,23 @@
 <div class="${baseClass}" data-dojo-attach-point="${baseClass}Node" style="border: thin solid
 black; border-radius: 5px; padding: 10px; line-height: 30px; margin-bottom: 20px; float:left;
 width: 100%">
-    <div style="float:left; width: 100%">
+	<div style="float:left; width: 100%">
 		<strong>GreetingID:</strong><span data-dojo-attach-point="nameNode">
-        ${greeting_id}</span><br>
+		${greeting_id}</span><br>
 		<strong>Updated by:</strong><span data-dojo-attach-point="authorNode"> ${author}</span><br>
 		<strong>Date:</strong><span data-dojo-attach-point="dateNode"> ${date}</span></br>
 		<strong>Content:</strong><span data-dojo-attach-point="contentNode"> ${!content}</span><br>
 		<span><strong>Tool:</strong></span>
-		<button data-dojo-attach-point="nodeDeleteButton"
-				data-dojo-attach-event="click: delete">Delete</button>
-		<button data-dojo-attach-event="click: _edit_greeting_event">Edit</button>
+		<button data-dojo-attach-point="deleteButtonNode">Delete</button>
+		<button data-dojo-attach-point="openEditFormNode">Edit</button>
 	</div><br>
-    <div data-dojo-attach-point="editFormNode" style="float:left; margin-top: 10px;
-    	border-top: thin solid black; padding-top: 10px; width: 100%; display: none">
-		<textarea style="width: 96%; height: 100px; padding: 8px"
-			  	data-dojo-attach-point="edit_greeting_content"></textarea><br>
-		<input data-dojo-attach-event="click: _update_greeting"
-               data-dojo-attach-point="button_update_content"
-			   name="submitNewGreeting"
+	<div data-dojo-attach-point="editFormNode" style="float:left; margin-top: 10px;
+		border-top: thin solid black; padding-top: 10px; width: 100%; display: none">
+		<textarea required="true" style="width: 96%; height: 100px; padding: 8px"
+				data-dojo-type="dijit/form/ValidationTextBox"
+				data-dojo-props="regExp:'\\w{1,50}', invalidMessage:'Khong vuot qua 50 ki tu.'"
+			  	data-dojo-attach-point="textEditGreetingNode"></textarea>
+		<input data-dojo-attach-point="submitUpdateGreetingNode"
 			   type="submit"
 			   value="Update">
 	</div>

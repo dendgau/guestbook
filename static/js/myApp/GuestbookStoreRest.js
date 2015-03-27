@@ -1,60 +1,66 @@
 define([
-    "dojo/_base/declare",
-    "dojo/store/Memory",
-    "dojo/store/JsonRest",
-    "dojo/store/Cache",
-    "dojo/cookie",
-    'dojo/Stateful'
-], function(declare, _Memory, _JsonRest, _Cache, cookie){
-    return declare([],{
-        _store: null,
-        guestbookName: "",
+	"dojo/_base/declare",
+	"dojo/Deferred",
+	"dojo/store/Memory",
+	"dojo/store/JsonRest",
+	"dojo/store/Cache",
+	"dojo/cookie",
+], function(declare, Deferred, Memory, JsonRest, Cache, cookie){
+	return declare([],{
+		jsonRest: null,
+		guestbookName: "",
 
-        constructor: function(){
-            this.watch("guestbookName", function(name, oldValue, newValue){
-                if (oldValue !== newValue) {
-                    var memoryStore = new _Memory();
-                    var jsonRestStore = new _JsonRest({
-                        target: "/guestbook_app/guestbook/" + newValue + "/greeting",
-                        headers: {"X-CSRFToken": cookie("csrftoken")}
-                    });
-                    this._store = new _Cache(jsonRestStore, memoryStore);
-                }
-            })
-        },
+		constructor: function(guestbook_name){
+			this.guestbookName = guestbook_name;
+			this.jsonRest = new JsonRest({
+				target: "/guestbook_app/guestbook/" + this.guestbookName + "/greeting",
+				headers: {"X-CSRFToken": cookie("csrftoken")}
+			});
+		},
 
-        access_api_get_list_greeting: function(guestbook_name, cursor){
-            this.guestbookName = guestbook_name;
-            return this._store.query({
-                "cursor" : cursor
-            });
-        },
+		checkTargetChange: function(guestbook_name){
+			if (this.guestbookName !== guestbook_name){
+				this.guestbookName = guestbook_name;
+				this.jsonRest = new JsonRest({
+					target: "/guestbook_app/guestbook/" + this.guestbookName + "/greeting",
+					headers: {"X-CSRFToken": cookie("csrftoken")}
+				});
+			}
+		},
 
-        access_api_post_greeting: function(guestbook_name, greeting_message){
-           this.guestbookName = guestbook_name;
-            return this._store.add({
-                "guestbook_name": guestbook_name,
-                "greeting_message": greeting_message
-            });
-        },
+		getGreetings: function(guestbook_name, cursor){
+			this.checkTargetChange(guestbook_name);
+			return this.jsonRest.query({
+				"cursor" : cursor
+			});
+		},
 
-        access_api_delete_greeting: function(guestbook_name, greeting_id){
-            this.guestbookName = guestbook_name;
-            return this._store.remove(greeting_id);
-        },
+		addGreeting: function(guestbook_name, greeting_message){
+		   this.checkTargetChange(guestbook_name);
+			return this.jsonRest.add({
+				"guestbook_name": guestbook_name,
+				"greeting_message": greeting_message
+			});
+		},
 
-        access_api_get_greeting_detail: function(guestbook_name, greeting_id){
-            this.guestbookName = guestbook_name;
-            return this._store.get(greeting_id);
-        },
+		deleteGreeting: function(guestbook_name, greeting_id){
+			this.checkTargetChange(guestbook_name);
+			return this.jsonRest.remove(greeting_id);
+		},
 
-        access_api_put_greeting: function(guestbook_name, greeting_id, greeting_message){
-            this.guestbookName = guestbook_name;
-            this.access_api_get_greeting_detail(guestbook_name, greeting_id);
-            return this._store.put({
-                "guestbook_name": guestbook_name,
-                "greeting_message": greeting_message
-            });
-        }
-    });
+		getGreetingDetail: function(guestbook_name, greeting_id){
+			this.checkTargetChange(guestbook_name);
+			console.log(this.jsonRest.get(greeting_id))
+			return this.jsonRest.get(greeting_id);
+		},
+
+		updateGreeting: function(guestbook_name, greeting_id, greeting_message){
+			this.checkTargetChange(guestbook_name);
+			return this.jsonRest.put({
+				"guestbook_name": guestbook_name,
+				"greeting_message": greeting_message,
+				"id": greeting_id
+			});
+		}
+	});
 });
