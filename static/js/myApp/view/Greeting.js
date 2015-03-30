@@ -77,21 +77,21 @@ define([
 			},
 
 			updateGreeting: function(){
-                if (this.textEditGreetingNode.validate() == true) {
-                    this.content = this.textEditGreetingNode.value
-                    this.guestbookStore.updateGreeting(
-                        this.guestbookName, this.greeting_id, this.content
-                    ).then(lang.hitch(this, function () {
-                            alert("Update Success");
-                            this.contentNode.innerHTML = this.content
-                            var formNode = this.editFormNode;
-                            domStyle.set(formNode, {"display": "none"});
-                        }), function (error) {
-                            alert(error);
-                        })
-                }else{
-                    alert("Form Invalid");
-                }
+				if (this.textEditGreetingNode.validate() == true) {
+					this.content = this.textEditGreetingNode.value
+					this.guestbookStore.updateGreeting(
+						this.guestbookName, this.greeting_id, this.content
+					).then(lang.hitch(this, function () {
+							alert("Update Success");
+							this.contentNode.innerHTML = this.content
+							var formNode = this.editFormNode;
+							domStyle.set(formNode, {"display": "none"});
+						}), function (error) {
+							alert(error);
+						})
+				}else{
+					alert("Form Invalid");
+				}
 			}
 		});
 });
