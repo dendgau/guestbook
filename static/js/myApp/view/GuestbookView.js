@@ -73,7 +73,6 @@ define([
 						);
 						domConstruct.place(docFragment, "greetings", "before");
 					}), function(error){
-						alert(error);
 					});
             },
 
