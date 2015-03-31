@@ -5,16 +5,16 @@ define([
 	"dojo/parser",
 	"dojo/ready",
 	"dojo/dom",
-	"myApp/view/Guestbook",
+	"myApp/view/GuestbookView",
 	"dojo/domReady!"
-], function(config, win, array, parser, ready, dom, Guestbook) {
+], function(config, win, array, parser, ready, dom, GuestbookView) {
 
 	ready(function() {
 		if (!config.parseOnLoad) {
 			parser.parse();
 		}
 
-		var guestbook = new Guestbook({"guestbook_name": "default_guestbook"});
+		var guestbook = new GuestbookView({"guestbook_name": "default_guestbook"});
 		var result = dom.byId("result");
 		guestbook.placeAt(result);
 	});

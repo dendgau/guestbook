@@ -7,18 +7,17 @@ define([
 	"dojo/dom",
 	"dojo/on",
 	"dojo/query",
-	"dojo/text!./templates/template_guestbook.html",
+	"dojo/text!./templates/GuestbookView.html",
 	"dijit/form/ValidationTextBox",
-	"dijit/_WidgetBase",
-	"dijit/_TemplatedMixin",
-	"dijit/_WidgetsInTemplateMixin",
+    "dijit/form/Button",
 	"dijit/registry",
-	"myApp/view/Greeting",
-	"myApp/GuestbookStoreRest",
+	"myApp/view/GreetingView",
+	"myApp/GuestbookStore",
+    "myApp/view/_ViewBaseMixin"
 ], function(declare, baseFx, lang, array, domConstruct,dom, on, query, template, ValidationTextBox,
-			_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, registry, Greeting, GuestbookStoreRest){
+			_WidgetsInTemplateMixin, registry, GreetingView, GuestbookStore, _ViewBaseMixin){
 
-		return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
+		return declare([_ViewBaseMixin], {
 
 			templateString: template,
 			guestbookStore: null,
@@ -26,16 +25,15 @@ define([
 
 			constructor: function(data){
 				this.guestbookName = data.guestbook_name;
-				this.guestbookStore = new GuestbookStoreRest(this.guestbookName);
+				this.guestbookStore = new GuestbookStore(this.guestbookName);
 			},
 
 			postCreate: function(data){
 				this.inherited(arguments);
-				this.textSwitchGuestbookNode.set("value", this.guestbookName);
-				this.getGreetings();
+				this.refreshGreetings();
 
 				this.own(
-					on(this.submitSwitchGuestbookNode,
+					on(this.submitSwitchGuestbook,
 						"click", lang.hitch(this, "changeGuestBook")),
 					on(this.submitNewGreetingNode,
 						"click", lang.hitch(this, "addNewGreeting"))
@@ -43,22 +41,23 @@ define([
 			},
 
 			changeGuestBook: function(){
-				console.log(this.textSwitchGuestbookNode);
-				this.guestbookName = this.textSwitchGuestbookNode.get("value");
-				this.getGreetings();
+				console.log(this.textSwitchGuestbook);
+				this.guestbookName = this.textSwitchGuestbook.get("value");
+				this.refreshGreetings();
 			},
 
-			getGreetings: function(){
-				array.forEach(query(".widget_greeting"), function(greetingNode){
+            clearGreetings: function(){
+                array.forEach(query(".widgetGreeting"), function(greetingNode){
 					var widget = registry.byNode(greetingNode);
 					widget.destroy();
 				})
+            },
 
-				this.guestbookStore.getGreetings(this.guestbookName, "")
+            getGreetings: function(){
+                this.guestbookStore.getGreetings(this.guestbookName, "")
 					.then(lang.hitch(this, function(result){
 						var greetings = result.greetings;
 						var docFragment = document.createDocumentFragment();
-						console.log(docFragment)
 						array.forEach(greetings, lang.hitch(this, function(greeting){
 								var data = {
 									"guestbook_store": this.guestbookStore,
@@ -68,26 +67,29 @@ define([
 									"content": greeting.greeting_content,
 									"date": greeting.greeting_date
 								}
-								var greeting = new Greeting(data);
-								greeting.startup();
-								console.log(greeting.domNode)
+								var greeting = new GreetingView(data);
 								docFragment.appendChild(greeting.domNode);
 							})
 						);
-						console.log(docFragment)
 						domConstruct.place(docFragment, "greetings", "before");
 					}), function(error){
 						alert(error);
 					});
+            },
+
+			refreshGreetings: function(){
+                this.clearGreetings();
+                this.getGreetings();
 			},
 
 			addNewGreeting: function(){
-				if (this.textNewGreetingNode.validate() == true) {
-					this.guestbookStore.addGreeting(this.guestbookName,
-						this.textNewGreetingNode.get("value")).then(lang.hitch(this, function (data) {
+				if (this.textNewGreeting.validate() == true) {
+                    var messageGreeting = this.textNewGreeting.get("value")
+					this.guestbookStore.addGreeting(this.guestbookName, messageGreeting)
+                        .then(lang.hitch(this, function (data) {
 							alert("Insert Success");
-							this.textNewGreetingNode.set("value", "");
-							this.getGreetings();
+							this.textNewGreeting.set("value", "");
+							this.refreshGreetings();
 						}), function (error) {
 							alert(error);
 						}

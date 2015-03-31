@@ -2,7 +2,7 @@
 black; border-radius: 5px; padding: 10px; line-height: 30px; margin-bottom: 20px; float:left;
 width: 100%">
 	<div style="float:left; width: 100%">
-		<strong>GreetingID:</strong><span data-dojo-attach-point="nameNode">
+		<strong>GreetingID:</strong><span data-dojo-attach-point="greetingIDNode">
 		${greeting_id}</span><br>
 		<strong>Updated by:</strong><span data-dojo-attach-point="authorNode"> ${author}</span><br>
 		<strong>Date:</strong><span data-dojo-attach-point="dateNode"> ${date}</span></br>
@@ -13,12 +13,11 @@ width: 100%">
 	</div><br>
 	<div data-dojo-attach-point="editFormNode" style="float:left; margin-top: 10px;
 		border-top: thin solid black; padding-top: 10px; width: 100%; display: none">
-		<textarea required="true" style="width: 96%; height: 100px; padding: 8px"
+		<input required="true" style="width: 96%; height: 100px; padding: 8px"
 				data-dojo-type="dijit/form/ValidationTextBox"
-				data-dojo-props="regExp:'\\w{1,50}', invalidMessage:'Khong vuot qua 50 ki tu.'"
-			  	data-dojo-attach-point="textEditGreetingNode"></textarea>
-		<input data-dojo-attach-point="submitUpdateGreetingNode"
-			   type="submit"
-			   value="Update">
+				data-dojo-props="regExp:'.{1,50}', invalidMessage:'Khong vuot qua 50 ki tu.'"
+			  	data-dojo-attach-point="textEditGreeting" />
+		<button data-dojo-type="dijit/form/Button"
+				data-dojo-attach-point="submitUpdateGreeting">Update</button>
 	</div>
 </div>

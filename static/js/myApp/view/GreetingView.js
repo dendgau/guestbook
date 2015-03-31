@@ -6,22 +6,19 @@ define([
 	"dojo/query",
 	"dojo/dom-style",
 	"dojo/dom",
-	"dojo/text!./templates/template_greeting.html",
-	"dijit/_WidgetBase",
-	"dijit/_TemplatedMixin",
+	"dojo/text!./templates/GreetingView.html",
 	"dijit/registry",
 	"dijit/form/Button",
 	"dijit/form/Form",
 	"dijit/form/TextBox",
-	"dijit/_WidgetsInTemplateMixin",
+	"myApp/view/_ViewBaseMixin"
 
-], function(declare, baseFx, lang, on, query, domStyle, dom, template, _WidgetBase, _TemplatedMixin,
-			registry, button, form, textbox, _WidgetsInTemplateMixin, ValidationTextBox){
+], function(declare, baseFx, lang, on, query, domStyle, dom, template,
+			registry, button, form, textbox, _ViewBaseMixin){
 
-		return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
+		return declare("WidgetGreeting", [_ViewBaseMixin], {
 
 			templateString: template,
-			baseClass: "widget_greeting",
 			guestbookStore: null,
 			guestbookName: "",
 			greeting_id: "",
@@ -50,7 +47,7 @@ define([
 						"click", lang.hitch(this, "deleteGreeting")),
 					on(this.openEditFormNode,
 						"click", lang.hitch(this, "openEditForm")),
-					on(this.submitUpdateGreetingNode,
+					on(this.submitUpdateGreeting,
 						"click", lang.hitch(this, "updateGreeting"))
 				);
 			},
@@ -70,15 +67,15 @@ define([
 					.then(lang.hitch(this, function(data){
 						var formNode = this.editFormNode;
 						domStyle.set(formNode, {"display": "block"});
-						this.textEditGreetingNode.set("value", data.content);
+						this.textEditGreeting.set("value", data.content);
 				}), function(error){
 					alert(error);
 				});
 			},
 
 			updateGreeting: function(){
-				if (this.textEditGreetingNode.validate() == true) {
-					this.content = this.textEditGreetingNode.value
+				if (this.textEditGreeting.validate() == true) {
+					this.content = this.textEditGreeting.value
 					this.guestbookStore.updateGreeting(
 						this.guestbookName, this.greeting_id, this.content
 					).then(lang.hitch(this, function () {
