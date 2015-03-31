@@ -9,11 +9,11 @@ define([
 	"dojo/query",
 	"dojo/text!./templates/GuestbookView.html",
 	"dijit/form/ValidationTextBox",
-    "dijit/form/Button",
+	"dijit/form/Button",
 	"dijit/registry",
 	"myApp/view/GreetingView",
 	"myApp/GuestbookStore",
-    "myApp/view/_ViewBaseMixin"
+	"myApp/view/_ViewBaseMixin"
 ], function(declare, baseFx, lang, array, domConstruct,dom, on, query, template, ValidationTextBox,
 			_WidgetsInTemplateMixin, registry, GreetingView, GuestbookStore, _ViewBaseMixin){
 
@@ -46,15 +46,15 @@ define([
 				this.refreshGreetings();
 			},
 
-            clearGreetings: function(){
-                array.forEach(query(".widgetGreeting"), function(greetingNode){
+			clearGreetings: function(){
+				array.forEach(query(".widgetGreeting"), function(greetingNode){
 					var widget = registry.byNode(greetingNode);
 					widget.destroy();
 				})
-            },
+			},
 
-            getGreetings: function(){
-                this.guestbookStore.getGreetings(this.guestbookName, "")
+			getGreetings: function(){
+				this.guestbookStore.getGreetings(this.guestbookName, "")
 					.then(lang.hitch(this, function(result){
 						var greetings = result.greetings;
 						var docFragment = document.createDocumentFragment();
@@ -74,18 +74,18 @@ define([
 						domConstruct.place(docFragment, "greetings", "before");
 					}), function(error){
 					});
-            },
+			},
 
 			refreshGreetings: function(){
-                this.clearGreetings();
-                this.getGreetings();
+				this.clearGreetings();
+				this.getGreetings();
 			},
 
 			addNewGreeting: function(){
 				if (this.textNewGreeting.validate() == true) {
-                    var messageGreeting = this.textNewGreeting.get("value")
+					var messageGreeting = this.textNewGreeting.get("value")
 					this.guestbookStore.addGreeting(this.guestbookName, messageGreeting)
-                        .then(lang.hitch(this, function (data) {
+						.then(lang.hitch(this, function (data) {
 							alert("Insert Success");
 							this.textNewGreeting.set("value", "");
 							this.refreshGreetings();

@@ -1,69 +1,69 @@
 {% load url from future %}
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<title>Test GuestBook</title>
-	</head>
-	<body>
-		<div class="main">
-		<table>
-			<thead>
-				<tr>
-					<td>Author</td>
-					<td>Guestbook</td>
-					<td>Content</td>
-					<td>Date</td>
-					{% if userInfo %}<td>Modify</td>{% endif %}
-				</tr>
-			</thead>
-			{% for greeting in greetings %}
-				<tbody>
-					<tr>
-						<td>
-						  {% if greeting.author.nickname %}
-							{% if userInfo and userInfo == greeting.author %}
-								<strong>You</strong> wrote
-							{% else %}
-								<strong>{{ greeting.author }}</strong> wrote
-							{% endif %}
-						  {% else %}
-							An <strong>anonymous person</strong> wrote
-						  {% endif %}
-						</td>
-						<td>
-							<strong>{{greeting.key.parent.id}}</strong>
-						</td>
-						<td>
-							<strong>{{ greeting.content|escape }}</strong><br>
-						</td>
-						<td>	
-							{{ greeting.date}}
-						</td>
-						{% if userInfo %}
-							<td>
-							{% if isAdmin %}
-								<a href="{% url 'edit' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Edit</a>
-								<a href="{% url 'delete' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Remove</a>
-							{% else %}
-								{% if userInfo == greeting.author %}
-									<a href="{% url 'edit' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Edit</a>
-								{% endif %}
-							{% endif %}
-							</td>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Test GuestBook</title>
+</head>
+<body>
+<div class="main">
+	<table>
+		<thead>
+		<tr>
+			<td>Author</td>
+			<td>Guestbook</td>
+			<td>Content</td>
+			<td>Date</td>
+			{% if userInfo %}<td>Modify</td>{% endif %}
+		</tr>
+		</thead>
+		{% for greeting in greetings %}
+			<tbody>
+			<tr>
+				<td>
+					{% if greeting.author.nickname %}
+						{% if userInfo and userInfo == greeting.author %}
+							<strong>You</strong> wrote
+						{% else %}
+							<strong>{{ greeting.author }}</strong> wrote
 						{% endif %}
-						
-					</tr>
-				</tbody>
-			{% endfor %}
-		</table>
-        <form method="GET">
-            <input type="text" name="guestbook_name" value="{{ guestbook_name }}">
-            <input type="submit" value="Find">
-        </form>
-			<a href="{{ url }}">{{ url_linktext }}</a>
-			<a href="{% url 'sign' %}">Sign Guestbook</a>
-		</div>
-	</body>
+					{% else %}
+						An <strong>anonymous person</strong> wrote
+					{% endif %}
+				</td>
+				<td>
+					<strong>{{greeting.key.parent.id}}</strong>
+				</td>
+				<td>
+					<strong>{{ greeting.content|escape }}</strong><br>
+				</td>
+				<td>
+					{{ greeting.date}}
+				</td>
+				{% if userInfo %}
+					<td>
+						{% if isAdmin %}
+							<a href="{% url 'edit' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Edit</a>
+							<a href="{% url 'delete' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Remove</a>
+						{% else %}
+							{% if userInfo == greeting.author %}
+								<a href="{% url 'edit' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Edit</a>
+							{% endif %}
+						{% endif %}
+					</td>
+				{% endif %}
+
+			</tr>
+			</tbody>
+		{% endfor %}
+	</table>
+	<form method="GET">
+		<input type="text" name="guestbook_name" value="{{ guestbook_name }}">
+		<input type="submit" value="Find">
+	</form>
+	<a href="{{ url }}">{{ url_linktext }}</a>
+	<a href="{% url 'sign' %}">Sign Guestbook</a>
+</div>
+</body>
 </html>
