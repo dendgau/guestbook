@@ -1,63 +1,58 @@
 define([
 	"dojo/_base/declare",
-	"dojo/Deferred",
-	"dojo/store/Memory",
 	"dojo/store/JsonRest",
-	"dojo/store/Cache",
 	"dojo/cookie",
-], function(declare, Deferred, Memory, JsonRest, Cache, cookie){
-	return declare([],{
+	"dojo/Stateful"
+], function(declare, JsonRest, cookie, Stateful){
+	return declare([Stateful],{
 		jsonRest: null,
-		guestbookName: "",
+		guestbookName: null,
 
-		constructor: function(guestbook_name){
+		_guestbookNameGetter: function(){
+			return this.guestbookName;
+		},
+
+		_guestbookNameSetter: function(guestbook_name){
 			this.guestbookName = guestbook_name;
-			this.jsonRest = new JsonRest({
-				target: "/guestbook_app/guestbook/" + this.guestbookName + "/greeting",
-				headers: {"X-CSRFToken": cookie("csrftoken")}
+		},
+
+		constructor: function(){
+			this.watch("guestbookName", function(name, oldValue, value){
+				if (oldValue !== value){
+					this.guestbookName = value;
+					this.jsonRest = new JsonRest({
+						target: "/guestbook_app/guestbook/" + this.guestbookName + "/greeting",
+						headers: {"X-CSRFToken": cookie("csrftoken")}
+					});
+				}
 			});
 		},
 
-		checkTargetChange: function(guestbook_name){
-			if (this.guestbookName !== guestbook_name){
-				this.guestbookName = guestbook_name;
-				this.jsonRest = new JsonRest({
-					target: "/guestbook_app/guestbook/" + this.guestbookName + "/greeting",
-					headers: {"X-CSRFToken": cookie("csrftoken")}
-				});
-			}
-		},
-
 		getGreetings: function(guestbook_name, cursor){
-			this.checkTargetChange(guestbook_name);
 			return this.jsonRest.query({
 				"cursor" : cursor
 			});
 		},
 
-		addGreeting: function(guestbook_name, greeting_message){
-		   this.checkTargetChange(guestbook_name);
+		addGreeting: function(greeting_message){
 			return this.jsonRest.add({
-				"guestbook_name": guestbook_name,
+				"guestbook_name": this.guestbookName,
 				"greeting_message": greeting_message
 			});
 		},
 
-		deleteGreeting: function(guestbook_name, greeting_id){
-			this.checkTargetChange(guestbook_name);
+		deleteGreeting: function(greeting_id){
 			return this.jsonRest.remove(greeting_id);
 		},
 
-		getGreetingDetail: function(guestbook_name, greeting_id){
-			this.checkTargetChange(guestbook_name);
+		getGreetingDetail: function(greeting_id){
 			console.log(this.jsonRest.get(greeting_id))
 			return this.jsonRest.get(greeting_id);
 		},
 
-		updateGreeting: function(guestbook_name, greeting_id, greeting_message){
-			this.checkTargetChange(guestbook_name);
+		updateGreeting: function(greeting_id, greeting_message){
 			return this.jsonRest.put({
-				"guestbook_name": guestbook_name,
+				"guestbook_name": this.guestbookName,
 				"greeting_message": greeting_message,
 				"id": greeting_id
 			});

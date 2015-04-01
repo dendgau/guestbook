@@ -25,7 +25,8 @@ define([
 
 			constructor: function(data){
 				this.guestbookName = data.guestbook_name;
-				this.guestbookStore = new GuestbookStore(this.guestbookName);
+				this.guestbookStore = new GuestbookStore();
+				this.guestbookStore.set("guestbookName", this.guestbookName);
 			},
 
 			postCreate: function(data){
@@ -33,9 +34,9 @@ define([
 				this.refreshGreetings();
 
 				this.own(
-					on(this.submitSwitchGuestbook,
+					on(this.switchGuestbookButton,
 						"click", lang.hitch(this, "changeGuestBook")),
-					on(this.submitNewGreetingNode,
+					on(this.submitNewGreetingButton,
 						"click", lang.hitch(this, "addNewGreeting"))
 				);
 			},
@@ -54,10 +55,12 @@ define([
 			},
 
 			getGreetings: function(){
-				this.guestbookStore.getGreetings(this.guestbookName, "")
+				this.guestbookStore.set("guestbookName", this.guestbookName);
+				this.guestbookStore.getGreetings("")
 					.then(lang.hitch(this, function(result){
 						var greetings = result.greetings;
 						var docFragment = document.createDocumentFragment();
+						var arrayWidgetGreeting = [];
 						array.forEach(greetings, lang.hitch(this, function(greeting){
 								var data = {
 									"guestbook_store": this.guestbookStore,
@@ -69,9 +72,14 @@ define([
 								}
 								var greeting = new GreetingView(data);
 								docFragment.appendChild(greeting.domNode);
+								arrayWidgetGreeting.push(greeting);
 							})
 						);
 						domConstruct.place(docFragment, "greetings", "before");
+						array.forEach(arrayWidgetGreeting, lang.hitch(this, function(greeting){
+								greeting.startup();
+							})
+						);
 					}), function(error){
 					});
 			},
@@ -83,8 +91,9 @@ define([
 
 			addNewGreeting: function(){
 				if (this.textNewGreeting.validate() == true) {
-					var messageGreeting = this.textNewGreeting.get("value")
-					this.guestbookStore.addGreeting(this.guestbookName, messageGreeting)
+					var messageGreeting = this.textNewGreeting.get("value");
+					this.guestbookStore.set("guestbookName", this.guestbookName);
+					this.guestbookStore.addGreeting(messageGreeting)
 						.then(lang.hitch(this, function (data) {
 							alert("Insert Success");
 							this.textNewGreeting.set("value", "");

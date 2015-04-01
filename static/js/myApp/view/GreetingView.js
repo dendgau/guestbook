@@ -43,17 +43,18 @@ define([
 				this.inherited(arguments);
 
 				this.own(
-					on(this.deleteButtonNode,
+					on(this.deleteButton,
 						"click", lang.hitch(this, "deleteGreeting")),
-					on(this.openEditFormNode,
+					on(this.openEditFormButton,
 						"click", lang.hitch(this, "openEditForm")),
-					on(this.submitUpdateGreeting,
+					on(this.submitUpdateGreetingButton,
 						"click", lang.hitch(this, "updateGreeting"))
 				);
 			},
 
 			deleteGreeting: function(){
-				this.guestbookStore.deleteGreeting(this.guestbookName, this.greeting_id)
+				this.guestbookStore.set("guestbookName", this.guestbookName);
+				this.guestbookStore.deleteGreeting(this.greeting_id)
 					.then(lang.hitch(this, function(data){
 						alert("Delete Success");
 						this.destroyRecursive();
@@ -63,7 +64,8 @@ define([
 			},
 
 			openEditForm: function(){
-				this.guestbookStore.getGreetingDetail(this.guestbookName, this.greeting_id)
+				this.guestbookStore.set("guestbookName", this.guestbookName);
+				this.guestbookStore.getGreetingDetail(this.greeting_id)
 					.then(lang.hitch(this, function(data){
 						var formNode = this.editFormNode;
 						domStyle.set(formNode, {"display": "block"});
@@ -76,9 +78,9 @@ define([
 			updateGreeting: function(){
 				if (this.textEditGreeting.validate() == true) {
 					this.content = this.textEditGreeting.value
-					this.guestbookStore.updateGreeting(
-						this.guestbookName, this.greeting_id, this.content
-					).then(lang.hitch(this, function () {
+					this.guestbookStore.set("guestbookName", this.guestbookName);
+					this.guestbookStore.updateGreeting(this.greeting_id, this.content)
+						.then(lang.hitch(this, function () {
 							alert("Update Success");
 							this.contentNode.innerHTML = this.content
 							var formNode = this.editFormNode;
