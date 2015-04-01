@@ -44,13 +44,16 @@ class Greeting(ndb.Model):
 	date = ndb.DateTimeProperty(auto_now_add=True)
 
 	@classmethod
-	def get_greeting_with_cursor(cls, url_safe, count=20):
+	def get_greeting_with_cursor(cls, url_safe, guestbook_name, count=20):
 		start_cursor = Cursor(urlsafe=url_safe)
-		greetings, next_cursor, is_more = cls.query().fetch_page(count, start_cursor=start_cursor)
+		greetings, next_cursor, is_more = cls.query(
+			ancestor=Guestbook.get_guestbook_key(guestbook_name)).order(-cls.date)\
+			.fetch_page(count, start_cursor=start_cursor)
 
 		greeting_json = [
 			{
-				"greeting_auth": greeting.author,
+				"greeting_id": greeting.key.id(),
+				"greeting_auth": str(greeting.author),
 				"greeting_content": greeting.content,
 				"greeting_date": str(greeting.date)
 			} for greeting in greetings
@@ -68,8 +71,7 @@ class Greeting(ndb.Model):
 	def get_greeting(cls, greeting_id, guestbook_name=AppConstants.get_default_guestbook_name()):
 		try:
 			greeting_id = int(greeting_id)
-			key = ndb.Key("Guestbook", str(guestbook_name),
-						  "Greeting", greeting_id)
+			key = ndb.Key("Guestbook", str(guestbook_name), "Greeting", greeting_id)
 			greeting = key.get()
 		except ValueError:
 			raise ValueError("Khong the ep kieu")
@@ -82,6 +84,8 @@ class Greeting(ndb.Model):
 		if greeting:
 			greeting.content = dictionary["content"]
 			greeting.updated_date = datetime.datetime.now()
+			if users.get_current_user():
+				greeting.author = users.get_current_user()
 			greeting.put()
 
 		return greeting

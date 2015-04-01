@@ -4,6 +4,7 @@ from django import http
 from django.http import Http404, HttpResponse
 from django.utils import simplejson as json
 from django.views.generic.edit import FormView
+from django.http import QueryDict
 
 from google.appengine.ext import ndb
 
@@ -31,8 +32,9 @@ class GreetingService(JSONResponseMixin, FormView):
 	# API GET list greetings
 	def get(self, *args, **kwargs):
 		url_safe = self.request.GET.get("cursor", None)
-		guestbook_name = kwargs.get("guestbook_name", AppConstants.get_default_guestbook_name())
-		greetings, next_cursor, is_more = Greeting.get_greeting_with_cursor(url_safe, 1)
+		guestbook_name = kwargs.get("guestbook_name")
+		greetings, next_cursor, is_more = Greeting.get_greeting_with_cursor(url_safe,
+			guestbook_name, 20)
 
 		data = {
 			"guestbook_name": guestbook_name,
@@ -42,6 +44,23 @@ class GreetingService(JSONResponseMixin, FormView):
 		}
 
 		return self.render_to_response(data)
+
+	def post(self, request, *args, **kwargs):
+		if self.request.POST:
+			try:
+				json_object = json.loads(self.request.body)
+			except ValueError:
+				self.request.POST = QueryDict(self.request.body)
+
+			else:
+				self.request.POST = json_object
+
+		form_class = self.get_form_class()
+		form = self.get_form(form_class)
+		if form.is_valid():
+			return self.form_valid(form)
+		else:
+			return self.form_invalid(form)
 
 	# API POST greeting when form valid
 	def form_valid(self, form):
@@ -70,7 +89,12 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 
 	# API put (update) greeting
 	def put(self, request, *args, **kwargs):
-		request.POST = json.loads(request.body)
+		try:
+			json_object = json.loads(self.request.body)
+		except ValueError:
+			self.request.POST = QueryDict(self.request.body)
+		else:
+			self.request.POST = json_object
 		form_class = self.get_form_class()
 		form = self.get_form(form_class)
 		if form.is_valid():
