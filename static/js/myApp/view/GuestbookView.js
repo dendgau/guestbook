@@ -42,7 +42,6 @@ define([
 			},
 
 			changeGuestBook: function(){
-				console.log(this.textSwitchGuestbook);
 				this.guestbookName = this.textSwitchGuestbook.get("value");
 				this.refreshGreetings();
 			},

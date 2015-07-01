@@ -5,6 +5,22 @@ import datetime
 from google.appengine.ext import ndb
 from google.appengine.api import users
 from google.appengine.datastore.datastore_query import Cursor
+from google.appengine.ext.db import Timeout
+
+
+def retry(transaction):
+
+	def access_database(*args, **kwds):
+		@ndb.transactional
+		def retry_access_database(*args, **kwds):
+			return transaction(*args, **kwds)
+
+		try:
+			return transaction(*args, **kwds)
+		except Timeout:
+			return retry_access_database(*args, **kwds)
+
+	return access_database
 
 
 class AppConstants(object):
@@ -44,6 +60,7 @@ class Greeting(ndb.Model):
 	date = ndb.DateTimeProperty(auto_now_add=True)
 
 	@classmethod
+	@retry
 	def get_greeting_with_cursor(cls, url_safe, guestbook_name, count=20):
 		start_cursor = Cursor(urlsafe=url_safe)
 		greetings, next_cursor, is_more = cls.query(
@@ -62,12 +79,14 @@ class Greeting(ndb.Model):
 		return greeting_json, next_cursor, is_more
 
 	@classmethod
+	@retry
 	def get_greetings(cls, guestbook_name=AppConstants.get_default_guestbook_name(), count=20):
 		greetings = cls.query(ancestor=Guestbook.get_guestbook_key(guestbook_name))\
 			.order(-cls.date).fetch(count)
 		return greetings
 	
 	@classmethod
+	@retry
 	def get_greeting(cls, greeting_id, guestbook_name=AppConstants.get_default_guestbook_name()):
 		try:
 			greeting_id = int(greeting_id)
@@ -77,8 +96,9 @@ class Greeting(ndb.Model):
 			raise ValueError("Khong the ep kieu")
 
 		return greeting
-	
+
 	@classmethod
+	@retry
 	def update_greeting(cls, dictionary):
 		greeting = cls.get_greeting(dictionary["greeting_id"], dictionary["guestbook_name"])
 		if greeting:
@@ -91,6 +111,7 @@ class Greeting(ndb.Model):
 		return greeting
 	
 	@classmethod
+	@retry
 	def delete_greeting(cls, dictionary):
 		try:
 			greeting_id = int(dictionary["greeting_id"])
@@ -110,6 +131,7 @@ class Greeting(ndb.Model):
 			raise ValueError("Khong the ep kieu")
 	
 	@classmethod
+	@retry
 	def put_from_dict(cls, dictionary):
 		guestbook_name = dictionary["guestbook_name"]
 		

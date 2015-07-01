@@ -46,7 +46,6 @@ define([
 		},
 
 		getGreetingDetail: function(greeting_id){
-			console.log(this.jsonRest.get(greeting_id))
 			return this.jsonRest.get(greeting_id);
 		},
 
