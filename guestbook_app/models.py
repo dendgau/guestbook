@@ -6,21 +6,17 @@ from google.appengine.ext import ndb
 from google.appengine.api import users
 from google.appengine.datastore.datastore_query import Cursor
 from google.appengine.ext.db import Timeout
+from functools import wraps
 
 
 def retry(transaction):
-
-	def access_database(*args, **kwds):
-		@ndb.transactional
-		def retry_access_database(*args, **kwds):
-			return transaction(*args, **kwds)
-
+	@wraps(transaction)
+	def wrapped(*args, **kwargs):
 		try:
-			return transaction(*args, **kwds)
+			return transaction(*args, **kwargs)
 		except Timeout:
-			return retry_access_database(*args, **kwds)
-
-	return access_database
+			raise "Can not connect to DB"
+	return wrapped
 
 
 class AppConstants(object):
@@ -59,12 +55,11 @@ class Greeting(ndb.Model):
 	content = ndb.StringProperty(indexed=False)
 	date = ndb.DateTimeProperty(auto_now_add=True)
 
-	@classmethod
 	@retry
-	def get_greeting_with_cursor(cls, url_safe, guestbook_name, count=20):
+	def get_greeting_with_cursor(self, url_safe, guestbook_name, count=20):
 		start_cursor = Cursor(urlsafe=url_safe)
-		greetings, next_cursor, is_more = cls.query(
-			ancestor=Guestbook.get_guestbook_key(guestbook_name)).order(-cls.date)\
+		greetings, next_cursor, is_more = self.query(
+			ancestor=Guestbook.get_guestbook_key(guestbook_name)).order(-Greeting.date)\
 			.fetch_page(count, start_cursor=start_cursor)
 
 		greeting_json = [
@@ -78,16 +73,14 @@ class Greeting(ndb.Model):
 
 		return greeting_json, next_cursor, is_more
 
-	@classmethod
 	@retry
-	def get_greetings(cls, guestbook_name=AppConstants.get_default_guestbook_name(), count=20):
-		greetings = cls.query(ancestor=Guestbook.get_guestbook_key(guestbook_name))\
-			.order(-cls.date).fetch(count)
+	def get_greetings(self, guestbook_name=AppConstants.get_default_guestbook_name(), count=20):
+		greetings = self.query(ancestor=Guestbook.get_guestbook_key(guestbook_name))\
+			.order(-Greeting.date).fetch(count)
 		return greetings
-	
-	@classmethod
+
 	@retry
-	def get_greeting(cls, greeting_id, guestbook_name=AppConstants.get_default_guestbook_name()):
+	def get_greeting(self, greeting_id, guestbook_name=AppConstants.get_default_guestbook_name()):
 		try:
 			greeting_id = int(greeting_id)
 			key = ndb.Key("Guestbook", str(guestbook_name), "Greeting", greeting_id)
@@ -97,53 +90,70 @@ class Greeting(ndb.Model):
 
 		return greeting
 
-	@classmethod
 	@retry
-	def update_greeting(cls, dictionary):
-		greeting = cls.get_greeting(dictionary["greeting_id"], dictionary["guestbook_name"])
+	def update_greeting(self, dictionary):
+		greeting = self.get_greeting(dictionary["greeting_id"], dictionary["guestbook_name"])
+
+		@ndb.transactional
+		def txn(greeting):
+			if greeting:
+				greeting.put()
+				return greeting
+			return False
+
 		if greeting:
 			greeting.content = dictionary["content"]
 			greeting.updated_date = datetime.datetime.now()
 			if users.get_current_user():
 				greeting.author = users.get_current_user()
-			greeting.put()
 
-		return greeting
-	
-	@classmethod
+		return txn(greeting)
+
 	@retry
-	def delete_greeting(cls, dictionary):
+	def delete_greeting(self, dictionary):
 		try:
 			greeting_id = int(dictionary["greeting_id"])
-			greeting = cls.get_greeting(greeting_id, dictionary["guestbook_name"])
+			greeting = self.get_greeting(greeting_id, dictionary["guestbook_name"])
 
 			if greeting is None:
 				return False
 			else:
 				key = ndb.Key(
 					"Guestbook", dictionary["guestbook_name"],
-					"Greeting", greeting_id)
+					"Greeting", greeting_id
+				)
 
-				greeting = key.get()
-				greeting.key.delete()
-				return True
+				@ndb.transactional
+				def txn(key):
+					ent = key.get()
+					if ent:
+						ent.key.delete()
+						return True
+					return False
+
+				return txn(key)
 		except ValueError:
 			raise ValueError("Khong the ep kieu")
-	
-	@classmethod
+
 	@retry
-	def put_from_dict(cls, dictionary):
+	def put_from_dict(self, dictionary):
 		guestbook_name = dictionary["guestbook_name"]
-		
+
+		@ndb.transactional
+		def txn(greeting):
+			if greeting:
+				greeting.put()
+				return True
+			return False
+
 		if Guestbook.check_is_exist(guestbook_name) is False:
 			Guestbook.add_new_book(guestbook_name)
-		
-		greeting = cls(parent=Guestbook.get_guestbook_key(guestbook_name))
+
+		greeting = Greeting(parent=Guestbook.get_guestbook_key(guestbook_name))
 		
 		if users.get_current_user():
 			greeting.author = users.get_current_user()
 			
 		greeting.content = dictionary["content"]
-		greeting.put()
 		
-		return greeting
+		return txn(greeting)
