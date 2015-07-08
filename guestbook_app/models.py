@@ -1,22 +1,10 @@
 # -*- coding: utf-8 -*-
-
 import datetime
-
 from google.appengine.ext import ndb
 from google.appengine.api import users
 from google.appengine.datastore.datastore_query import Cursor
-from google.appengine.ext.db import Timeout
-from functools import wraps
 
-
-def retry(transaction):
-	@wraps(transaction)
-	def wrapped(*args, **kwargs):
-		try:
-			return transaction(*args, **kwargs)
-		except Timeout:
-			raise "Can not connect to DB"
-	return wrapped
+from .retry import retry
 
 
 class AppConstants(object):
@@ -55,12 +43,12 @@ class Greeting(ndb.Model):
 	content = ndb.StringProperty(indexed=False)
 	date = ndb.DateTimeProperty(auto_now_add=True)
 
-	@retry
-	def get_greeting_with_cursor(self, url_safe, guestbook_name, count=20):
+	@classmethod
+	def get_greeting_with_cursor(cls, url_safe, guestbook_name, count=20):
 		start_cursor = Cursor(urlsafe=url_safe)
-		greetings, next_cursor, is_more = self.query(
-			ancestor=Guestbook.get_guestbook_key(guestbook_name)).order(-Greeting.date)\
-			.fetch_page(count, start_cursor=start_cursor)
+		greetings, next_cursor, is_more = cls.query(
+			ancestor=Guestbook.get_guestbook_key(guestbook_name)
+		).order(-Greeting.date).fetch_page(count, start_cursor=start_cursor)
 
 		greeting_json = [
 			{
@@ -73,32 +61,34 @@ class Greeting(ndb.Model):
 
 		return greeting_json, next_cursor, is_more
 
-	@retry
-	def get_greetings(self, guestbook_name=AppConstants.get_default_guestbook_name(), count=20):
-		greetings = self.query(ancestor=Guestbook.get_guestbook_key(guestbook_name))\
-			.order(-Greeting.date).fetch(count)
+	@classmethod
+	def get_greetings(cls, guestbook_name=AppConstants.get_default_guestbook_name(), count=20):
+		greetings = cls.query(
+			ancestor=Guestbook.get_guestbook_key(guestbook_name)
+		).order(-Greeting.date).fetch(count)
+
 		return greetings
 
-	@retry
-	def get_greeting(self, greeting_id, guestbook_name=AppConstants.get_default_guestbook_name()):
+	@classmethod
+	def get_greeting(cls, greeting_id, guestbook_name=AppConstants.get_default_guestbook_name()):
 		try:
 			greeting_id = int(greeting_id)
 			key = ndb.Key("Guestbook", str(guestbook_name), "Greeting", greeting_id)
 			greeting = key.get()
 		except ValueError:
-			raise ValueError("Khong the ep kieu")
+			raise ValueError("Greeting ID must be a positive integer. Please try again!")
 
 		return greeting
 
-	@retry
-	def update_greeting(self, dictionary):
-		greeting = self.get_greeting(dictionary["greeting_id"], dictionary["guestbook_name"])
+	@classmethod
+	def update_greeting(cls, dictionary):
+		greeting = cls.get_greeting(dictionary["greeting_id"], dictionary["guestbook_name"])
 
 		@ndb.transactional
-		def txn(greeting):
-			if greeting:
-				greeting.put()
-				return greeting
+		def txn(ent):
+			if ent:
+				retry(try_count=5, back_off=1)(lambda: ent.put())()
+				return ent
 			return False
 
 		if greeting:
@@ -109,11 +99,11 @@ class Greeting(ndb.Model):
 
 		return txn(greeting)
 
-	@retry
-	def delete_greeting(self, dictionary):
+	@classmethod
+	def delete_greeting(cls, dictionary):
 		try:
 			greeting_id = int(dictionary["greeting_id"])
-			greeting = self.get_greeting(greeting_id, dictionary["guestbook_name"])
+			greeting = cls.get_greeting(greeting_id, dictionary["guestbook_name"])
 
 			if greeting is None:
 				return False
@@ -127,22 +117,22 @@ class Greeting(ndb.Model):
 				def txn(key):
 					ent = key.get()
 					if ent:
-						ent.key.delete()
+						retry(try_count=5, back_off=1)(lambda: ent.key.delete())()
 						return True
 					return False
 
 				return txn(key)
 		except ValueError:
-			raise ValueError("Khong the ep kieu")
+			raise ValueError("Greeting ID must be a positive integer. Please try again!")
 
-	@retry
-	def put_from_dict(self, dictionary):
+	@classmethod
+	def put_from_dict(cls, dictionary):
 		guestbook_name = dictionary["guestbook_name"]
 
 		@ndb.transactional
-		def txn(greeting):
-			if greeting:
-				greeting.put()
+		def txn(ent):
+			if ent:
+				retry(try_count=5, back_off=1)(lambda: ent.put())()
 				return True
 			return False
 
@@ -150,10 +140,8 @@ class Greeting(ndb.Model):
 			Guestbook.add_new_book(guestbook_name)
 
 		greeting = Greeting(parent=Guestbook.get_guestbook_key(guestbook_name))
-		
+		greeting.content = dictionary["content"]
 		if users.get_current_user():
 			greeting.author = users.get_current_user()
-			
-		greeting.content = dictionary["content"]
 		
 		return txn(greeting)

@@ -33,7 +33,8 @@ class GreetingService(JSONResponseMixin, FormView):
 	def get(self, *args, **kwargs):
 		url_safe = self.request.GET.get("cursor", None)
 		guestbook_name = kwargs.get("guestbook_name")
-		greetings, next_cursor, is_more = Greeting().get_greeting_with_cursor(
+
+		greetings, next_cursor, is_more = Greeting.get_greeting_with_cursor(
 			url_safe,
 			guestbook_name, 20
 		)
@@ -82,7 +83,7 @@ class GreetingService(JSONResponseMixin, FormView):
 			'guestbook_name': form.cleaned_data["guestbook_name"],
 			'content': form.cleaned_data["greeting_message"]
 		}
-		return Greeting().put_from_dict(dictionary)
+		return Greeting.put_from_dict(dictionary)
 
 
 class GreetingServiceDetail(JSONResponseMixin, FormView):
@@ -97,8 +98,10 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 			self.request.POST = QueryDict(self.request.body)
 		else:
 			self.request.POST = json_object
+
 		form_class = self.get_form_class()
 		form = self.get_form(form_class)
+
 		if form.is_valid():
 			return self.form_valid(form)
 		else:
@@ -121,29 +124,32 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 		greeting_id = self.kwargs.get("greeting_id")
 		book_id = self.kwargs.get("guestbook_name")
 		greeting_content = form.cleaned_data["greeting_message"]
+
 		dictionary = {
 			'guestbook_name': book_id,
 			'greeting_id': greeting_id,
 			'content': greeting_content
 		}
-		return Greeting().update_greeting(dictionary)
+
+		return Greeting.update_greeting(dictionary)
 
 	# API GET detail greeting
 	def get(self, request, *args, **kwargs):
 		greeting_id = kwargs.get("greeting_id")
 		guestbook_name = kwargs.get("guestbook_name")
 
-		greeting = Greeting().get_greeting(greeting_id, guestbook_name)
+		greeting = Greeting.get_greeting(greeting_id, guestbook_name)
 		if greeting is None:
 			return HttpResponse(status=404)
 
 		data = {
+			"guestbook_name": guestbook_name,
 			"greeting_id": str(greeting_id),
 			"content": greeting.content,
 			"date": str(greeting.date),
 			"updated_by": str(greeting.author),
-			"guestbook_name": guestbook_name
 		}
+
 		return self.render_to_response(data)
 
 	# API DELETE greeting
@@ -154,8 +160,8 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 			'guestbook_name': guestbook_name,
 			'greeting_id': greeting_id
 		}
-		is_delete_success = Greeting().delete_greeting(dictionary)
 
+		is_delete_success = Greeting.delete_greeting(dictionary)
 		if is_delete_success is True:
 			return HttpResponse(status=204)
 		else:
