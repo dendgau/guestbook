@@ -29,8 +29,9 @@ class GreetingService(JSONResponseMixin, FormView):
 	form_class = SignForm
 	success_url = '/'
 
-	# API GET list greetings
 	def get(self, *args, **kwargs):
+		"""API GET list greetings"""
+
 		url_safe = self.request.GET.get("cursor", None)
 		guestbook_name = kwargs.get("guestbook_name")
 
@@ -49,6 +50,7 @@ class GreetingService(JSONResponseMixin, FormView):
 		return self.render_to_response(data)
 
 	def post(self, request, *args, **kwargs):
+		"""Access to API POST greeting"""
 		if self.request.POST:
 			try:
 				json_object = json.loads(self.request.body)
@@ -65,20 +67,22 @@ class GreetingService(JSONResponseMixin, FormView):
 		else:
 			return self.form_invalid(form)
 
-	# API POST greeting when form valid
 	def form_valid(self, form):
+		"""API POST greeting when form valid"""
+
 		new_greeting = self.greeting_create(form)
 		if new_greeting:
 			return HttpResponse(status=204)
 		else:
 			return HttpResponse(status=404)
 
-	# API POST greeting when form invalid
 	def form_invalid(self, form):
+		"""API POST greeting when form invalid"""
 		return HttpResponse(status=400)
 
-	# Function update greeting.
 	def greeting_create(self, form):
+		"""Function update greeting"""
+
 		dictionary = {
 			'guestbook_name': form.cleaned_data["guestbook_name"],
 			'content': form.cleaned_data["greeting_message"]
@@ -90,8 +94,9 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 	form_class = SignForm
 	success_url = '/'
 
-	# API put (update) greeting
 	def put(self, request, *args, **kwargs):
+		"""API put (update) greeting"""
+
 		try:
 			json_object = json.loads(self.request.body)
 		except ValueError:
@@ -107,20 +112,22 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 		else:
 			return self.form_invalid(form)
 
-	# Implement when form put valid
 	def form_valid(self, form):
+		"""Implement when form put valid"""
+
 		greeting = self.greeting_update(form)
 		if greeting:
 			return HttpResponse(status=204)
 		else:
 			return HttpResponse(status=404)
 
-	# Implement when form put invalid
 	def form_invalid(self, form):
+		"""Implement when form put invalid"""
 		return HttpResponse(status=400)
 
-	# Implement when form put invalid
 	def greeting_update(self, form):
+		"""Implement when form put invalid"""
+
 		greeting_id = self.kwargs.get("greeting_id")
 		book_id = self.kwargs.get("guestbook_name")
 		greeting_content = form.cleaned_data["greeting_message"]
@@ -133,8 +140,9 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 
 		return Greeting.update_greeting(dictionary)
 
-	# API GET detail greeting
 	def get(self, request, *args, **kwargs):
+		"""API GET detail greeting"""
+
 		greeting_id = kwargs.get("greeting_id")
 		guestbook_name = kwargs.get("guestbook_name")
 
@@ -152,10 +160,12 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 
 		return self.render_to_response(data)
 
-	# API DELETE greeting
 	def delete(self, *args, **kwargs):
+		"""API DELETE greeting"""
+
 		greeting_id = kwargs.get("greeting_id")
 		guestbook_name = kwargs.get("guestbook_name")
+
 		dictionary = {
 			'guestbook_name': guestbook_name,
 			'greeting_id': greeting_id

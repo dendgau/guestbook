@@ -8,12 +8,14 @@ from .retry import retry
 
 
 class AppConstants(object):
+	"""Constants Application"""
 	@staticmethod
 	def get_default_guestbook_name():
 		return "default_guestbook"
 
 
 class Guestbook(ndb.Model):
+	"""Guestbook Model"""
 	name = ndb.StringProperty(indexed=True)
 	
 	@staticmethod
@@ -39,6 +41,7 @@ class Guestbook(ndb.Model):
 
 
 class Greeting(ndb.Model):
+	"""Greeting Model"""
 	author = ndb.UserProperty()
 	content = ndb.StringProperty(indexed=False)
 	date = ndb.DateTimeProperty(auto_now_add=True)
