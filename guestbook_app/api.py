@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+import datetime
 
 from django import http
 from django.http import Http404, HttpResponse
 from django.utils import simplejson as json
 from django.views.generic.edit import FormView
 from django.http import QueryDict
+
+from google.appengine.api import users
 
 from google.appengine.ext import ndb
 
@@ -83,11 +86,13 @@ class GreetingService(JSONResponseMixin, FormView):
 	def greeting_create(self, form):
 		"""Function update greeting"""
 
+		guestbook_name = str(form.cleaned_data["guestbook_name"])
+
 		dictionary = {
-			'guestbook_name': form.cleaned_data["guestbook_name"],
-			'content': form.cleaned_data["greeting_message"]
+			'content': form.cleaned_data["greeting_message"],
+			'author': users.get_current_user() if users.get_current_user() else "Anonymous",
 		}
-		return Greeting.put_from_dict(dictionary)
+		return Greeting.put_from_dict(guestbook_name, **dictionary)
 
 
 class GreetingServiceDetail(JSONResponseMixin, FormView):
@@ -129,16 +134,20 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 		"""Implement when form put invalid"""
 
 		greeting_id = self.kwargs.get("greeting_id")
-		book_id = self.kwargs.get("guestbook_name")
+		guestbook_name = self.kwargs.get("guestbook_name")
 		greeting_content = form.cleaned_data["greeting_message"]
 
 		dictionary = {
-			'guestbook_name': book_id,
-			'greeting_id': greeting_id,
-			'content': greeting_content
+			'author': users.get_current_user() if users.get_current_user() else "Anonymous",
+			'content': greeting_content,
+			'date': datetime.datetime.now(),
 		}
 
-		return Greeting.update_greeting(dictionary)
+		return Greeting.update_greeting(
+			guestbook_name=guestbook_name,
+			greeting_id=greeting_id,
+			**dictionary
+		)
 
 	def get(self, request, *args, **kwargs):
 		"""API GET detail greeting"""
@@ -153,9 +162,9 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 		data = {
 			"guestbook_name": guestbook_name,
 			"greeting_id": str(greeting_id),
-			"content": greeting.content,
-			"date": str(greeting.date),
 			"updated_by": str(greeting.author),
+			"content": greeting.content,
+			"date": str(greeting.date)
 		}
 
 		return self.render_to_response(data)
@@ -166,12 +175,7 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 		greeting_id = kwargs.get("greeting_id")
 		guestbook_name = kwargs.get("guestbook_name")
 
-		dictionary = {
-			'guestbook_name': guestbook_name,
-			'greeting_id': greeting_id
-		}
-
-		is_delete_success = Greeting.delete_greeting(dictionary)
+		is_delete_success = Greeting.delete_greeting(guestbook_name, greeting_id)
 		if is_delete_success is True:
 			return HttpResponse(status=204)
 		else:

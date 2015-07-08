@@ -4,7 +4,7 @@ from google.appengine.ext import ndb
 from google.appengine.api import users
 from google.appengine.datastore.datastore_query import Cursor
 
-from .retry import retry
+from .decorator import retry
 
 
 class AppConstants(object):
@@ -35,9 +35,14 @@ class Guestbook(ndb.Model):
 	@classmethod
 	def add_new_book(cls, guestbook_name):
 		guestbook = cls()
-		guestbook.name = guestbook_name
-		guestbook.put()
-		return guestbook
+
+		@ndb.transactional
+		def txn(ent, **kwds):
+			ent.populate(**kwds)
+			retry(try_count=5, back_off=1)(lambda: ent.put())()
+			return ent
+
+		return txn(guestbook, name=guestbook_name)
 
 
 class Greeting(ndb.Model):
@@ -76,75 +81,73 @@ class Greeting(ndb.Model):
 	def get_greeting(cls, greeting_id, guestbook_name=AppConstants.get_default_guestbook_name()):
 		try:
 			greeting_id = int(greeting_id)
-			key = ndb.Key("Guestbook", str(guestbook_name), "Greeting", greeting_id)
-			greeting = key.get()
 		except ValueError:
 			raise ValueError("Greeting ID must be a positive integer. Please try again!")
 
+		key = ndb.Key("Guestbook", str(guestbook_name), "Greeting", greeting_id)
+		greeting = key.get()
 		return greeting
 
 	@classmethod
-	def update_greeting(cls, dictionary):
-		greeting = cls.get_greeting(dictionary["greeting_id"], dictionary["guestbook_name"])
-
-		@ndb.transactional
-		def txn(ent):
-			if ent:
-				retry(try_count=5, back_off=1)(lambda: ent.put())()
-				return ent
-			return False
-
-		if greeting:
-			greeting.content = dictionary["content"]
-			greeting.updated_date = datetime.datetime.now()
-			if users.get_current_user():
-				greeting.author = users.get_current_user()
-
-		return txn(greeting)
-
-	@classmethod
-	def delete_greeting(cls, dictionary):
+	def update_greeting(cls, guestbook_name, greeting_id, **kwargs):
 		try:
-			greeting_id = int(dictionary["greeting_id"])
-			greeting = cls.get_greeting(greeting_id, dictionary["guestbook_name"])
-
-			if greeting is None:
-				return False
-			else:
-				key = ndb.Key(
-					"Guestbook", dictionary["guestbook_name"],
-					"Greeting", greeting_id
-				)
-
-				@ndb.transactional
-				def txn(key):
-					ent = key.get()
-					if ent:
-						retry(try_count=5, back_off=1)(lambda: ent.key.delete())()
-						return True
-					return False
-
-				return txn(key)
+			greeting_id = int(greeting_id)
 		except ValueError:
 			raise ValueError("Greeting ID must be a positive integer. Please try again!")
 
+		greeting = cls.get_greeting(greeting_id, guestbook_name)
+		if greeting:
+
+			@ndb.transactional
+			def txn(key, **kwds):
+				ent = key.get()
+				ent.populate(**kwds)
+				retry(try_count=5, back_off=1)(lambda: ent.put())()
+				return ent
+
+			return txn(greeting.key, **kwargs)
+
+		return False
+
 	@classmethod
-	def put_from_dict(cls, dictionary):
-		guestbook_name = dictionary["guestbook_name"]
+	def delete_greeting(cls, guestbook_name, greeting_id):
+		try:
+			greeting_id = int(greeting_id)
+		except ValueError:
+			raise ValueError("Greeting ID must be a positive integer. Please try again!")
+
+		greeting = cls.get_greeting(greeting_id, guestbook_name)
+		if greeting:
+
+			@ndb.transactional
+			def txn(key):
+				ent = key.get()
+				if ent:
+					retry(try_count=5, back_off=1)(lambda: ent.key.delete())()
+					return True
+				return False
+
+			return txn(greeting.key)
+
+		return False
+
+	@classmethod
+	def put_from_dict(cls, guestbook_name=AppConstants.get_default_guestbook_name(), **kwargs):
 
 		@ndb.transactional
-		def txn(ent):
-			if ent:
-				retry(try_count=5, back_off=1)(lambda: ent.put())()
-				return True
-			return False
+		def txn(ent, **kwds):
+			ent.populate(**kwds)
+			retry(try_count=5, back_off=1)(lambda: ent.put())()
+			return ent
 
+		is_guestbook_exist = True
 		if Guestbook.check_is_exist(guestbook_name) is False:
-			Guestbook.add_new_book(guestbook_name)
+			is_guestbook_exist = Guestbook.add_new_book(guestbook_name)
 
-		greeting = Greeting(parent=Guestbook.get_guestbook_key(guestbook_name))
-		greeting.content = dictionary["content"]
-		if users.get_current_user():
-			greeting.author = users.get_current_user()
-		
-		return txn(greeting)
+		if is_guestbook_exist:
+			greeting = cls(parent=Guestbook.get_guestbook_key(guestbook_name))
+			txn(greeting, **kwargs)
+
+			return txn(greeting)
+
+		return False

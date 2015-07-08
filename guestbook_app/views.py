@@ -3,6 +3,7 @@
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
+import datetime
 from django import forms
 from django.contrib import messages
 from django.views.generic.edit import FormView
@@ -68,11 +69,12 @@ class SignView(FormView):
 		return super(SignView, self).form_valid(form)
 
 	def greeting_create(self, form):
+		guestbook_name = str(form.cleaned_data["guestbook_name"])
 		dictionary = {
-			'guestbook_name': form.cleaned_data["guestbook_name"],
-			'content': form.cleaned_data["greeting_message"]
+			'content': form.cleaned_data["greeting_message"],
+			'author': users.get_current_user() if users.get_current_user() else "Anonymous",
 		}
-		Greeting.put_from_dict(dictionary)
+		return Greeting.put_from_dict(guestbook_name, **dictionary)
 
 
 class GreetingEditView(FormView):
@@ -100,11 +102,16 @@ class GreetingEditView(FormView):
 		guestbook_name = form.cleaned_data["guestbook_name"]
 		greeting_content = form.cleaned_data["greeting_message"]
 		dictionary = {
-			'guestbook_name': guestbook_name,
-			'greeting_id': greeting_id,
-			'content': greeting_content
+			'author': users.get_current_user() if users.get_current_user() else "Anonymous",
+			'content': greeting_content,
+			'date': datetime.datetime.now(),
 		}
-		Greeting.update_greeting(dictionary)
+
+		return Greeting.update_greeting(
+			guestbook_name=guestbook_name,
+			greeting_id=greeting_id,
+			**dictionary
+		)
 
 
 class GreetingDeleteView(FormView):
@@ -131,11 +138,7 @@ class GreetingDeleteView(FormView):
 		if self.request.POST.get("btn_yes"):
 			greeting_id = form.cleaned_data["greeting_id"]
 			guestbook_name = form.cleaned_data["guestbook_name"]
-			dictionary = {
-				'greeting_id': greeting_id,
-				'guestbook_name': guestbook_name
-			}
-			Greeting.delete_greeting(dictionary)
+			Greeting.delete_greeting(guestbook_name, greeting_id)
 
 
 class MainView(TemplateView):
