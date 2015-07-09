@@ -90,7 +90,7 @@ class GreetingService(JSONResponseMixin, FormView):
 
 		dictionary = {
 			'content': form.cleaned_data["greeting_message"],
-			'author': users.get_current_user() if users.get_current_user() else "Anonymous",
+			'author': users.get_current_user() if users.get_current_user() else None,
 		}
 		return Greeting.put_from_dict(guestbook_name, **dictionary)
 
@@ -138,7 +138,7 @@ class GreetingServiceDetail(JSONResponseMixin, FormView):
 		greeting_content = form.cleaned_data["greeting_message"]
 
 		dictionary = {
-			'author': users.get_current_user() if users.get_current_user() else "Anonymous",
+			'author': users.get_current_user() if users.get_current_user() else None,
 			'content': greeting_content,
 			'date': datetime.datetime.now(),
 		}
