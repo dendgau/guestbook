@@ -7,11 +7,6 @@ from google.appengine.datastore.datastore_query import Cursor
 from .decorator import retry
 
 
-@retry(try_count=5, back_off=1)
-def transaction(func):
-	func()
-
-
 class AppConstants(object):
 	"""Constants Application"""
 	@staticmethod
@@ -42,12 +37,13 @@ class Guestbook(ndb.Model):
 		guestbook = cls()
 
 		@ndb.transactional
-		def txn(ent, **kwds):
-			ent.populate(**kwds)
-			transaction(lambda: ent.put())
+		@retry
+		def txn(ent):
+			ent.populate()
 			return ent
 
-		return txn(guestbook, name=guestbook_name)
+		guestbook.populate(name=guestbook_name)
+		return txn(guestbook)
 
 
 class Greeting(ndb.Model):
@@ -104,13 +100,13 @@ class Greeting(ndb.Model):
 		if greeting:
 
 			@ndb.transactional
-			def txn(key, **kwds):
-				ent = key.get()
-				ent.populate(**kwds)
-				transaction(lambda: ent.put())
+			@retry
+			def txn(ent):
+				ent.put()
 				return ent
 
-			return txn(greeting.key, **kwargs)
+			greeting.populate(**kwargs)
+			return txn(greeting)
 
 		return False
 
@@ -125,14 +121,14 @@ class Greeting(ndb.Model):
 		if greeting:
 
 			@ndb.transactional
-			def txn(key):
-				ent = key.get()
+			@retry
+			def txn(ent):
 				if ent:
-					transaction(lambda: key.delete())
+					ent.key.delete()
 					return True
 				return False
 
-			return txn(greeting.key)
+			return txn(greeting)
 
 		return False
 
@@ -140,9 +136,9 @@ class Greeting(ndb.Model):
 	def put_from_dict(cls, guestbook_name=AppConstants.get_default_guestbook_name(), **kwargs):
 
 		@ndb.transactional
-		def txn(ent, **kwds):
-			ent.populate(**kwds)
-			transaction(lambda: ent.put())
+		@retry
+		def txn(ent):
+			ent.put()
 			return ent
 
 		is_guestbook_exist = True
@@ -151,7 +147,7 @@ class Greeting(ndb.Model):
 
 		if is_guestbook_exist:
 			greeting = cls(parent=Guestbook.get_guestbook_key(guestbook_name))
-			txn(greeting, **kwargs)
+			greeting.populate(**kwargs)
 
 			return txn(greeting)
 

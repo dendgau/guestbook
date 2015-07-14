@@ -72,7 +72,7 @@ class SignView(FormView):
 		guestbook_name = str(form.cleaned_data["guestbook_name"])
 		dictionary = {
 			'content': form.cleaned_data["greeting_message"],
-			'author': users.get_current_user() if users.get_current_user() else "Anonymous",
+			'author': users.get_current_user() if users.get_current_user() else None,
 		}
 		return Greeting.put_from_dict(guestbook_name, **dictionary)
 
@@ -102,7 +102,7 @@ class GreetingEditView(FormView):
 		guestbook_name = form.cleaned_data["guestbook_name"]
 		greeting_content = form.cleaned_data["greeting_message"]
 		dictionary = {
-			'author': users.get_current_user() if users.get_current_user() else "Anonymous",
+			'author': users.get_current_user() if users.get_current_user() else None,
 			'content': greeting_content,
 			'date': datetime.datetime.now(),
 		}
@@ -144,7 +144,8 @@ class GreetingDeleteView(FormView):
 class MainView(TemplateView):
 	template_name = "main_view.html"
 	
-	def get_context_data(self):
+	def get_context_data(self, *args, **kwargs):
+		a = kwargs.pop("user", None)
 		guestbook_name = self.request.GET.get('guestbook_name', AppConstants.get_default_guestbook_name())
 		greetings = Greeting.get_greetings(guestbook_name)
 

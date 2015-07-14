@@ -10,7 +10,6 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-
 	url(r"^sign$", SignView.as_view(), name="sign"),
 	url(r"^edit", GreetingEditView.as_view(), name="edit"),
 	url(r"^delete$", GreetingDeleteView.as_view(), name="delete"),
@@ -18,4 +17,5 @@ urlpatterns = patterns('',
 					GreetingServiceDetail.as_view(), name="greeting-service-detail"),
 	url(r"^guestbook/(?P<guestbook_name>.+)/greeting$",
 					GreetingService.as_view(), name="greeting-service"),
-	url(r"^dojo$", TemplateView.as_view(template_name="dojo_template.html"), name="dojo"),)
+	url(r"^dojo$", TemplateView.as_view(template_name="dojo_template.html"), name="dojo")
+)
