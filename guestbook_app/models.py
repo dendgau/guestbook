@@ -37,13 +37,12 @@ class Guestbook(ndb.Model):
 		guestbook = cls()
 
 		@ndb.transactional
-		@retry
-		def txn(ent):
-			ent.populate()
+		def txn(ent, **kwds):
+			ent.populate(**kwds)
+			ent.put()
 			return ent
 
-		guestbook.populate(name=guestbook_name)
-		return txn(guestbook)
+		return txn(guestbook, name=guestbook_name)
 
 
 class Greeting(ndb.Model):
@@ -101,12 +100,13 @@ class Greeting(ndb.Model):
 
 			@ndb.transactional
 			@retry
-			def txn(ent):
+			def txn(key, **kwds):
+				ent = key.get()
+				ent.populate(**kwds)
 				ent.put()
 				return ent
 
-			greeting.populate(**kwargs)
-			return txn(greeting)
+			return txn(greeting.key, **kwargs)
 
 		return False
 
@@ -122,13 +122,14 @@ class Greeting(ndb.Model):
 
 			@ndb.transactional
 			@retry
-			def txn(ent):
+			def txn(key):
+				ent = key.get()
 				if ent:
-					ent.key.delete()
+					key.delete()
 					return True
 				return False
 
-			return txn(greeting)
+			return txn(greeting.key)
 
 		return False
 
@@ -137,7 +138,8 @@ class Greeting(ndb.Model):
 
 		@ndb.transactional
 		@retry
-		def txn(ent):
+		def txn(ent, **kwds):
+			ent.populate(**kwds)
 			ent.put()
 			return ent
 
@@ -147,8 +149,7 @@ class Greeting(ndb.Model):
 
 		if is_guestbook_exist:
 			greeting = cls(parent=Guestbook.get_guestbook_key(guestbook_name))
-			greeting.populate(**kwargs)
 
-			return txn(greeting)
+			return txn(greeting, **kwargs)
 
 		return False
