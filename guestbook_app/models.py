@@ -8,8 +8,8 @@ from .decorator import retry
 
 
 @retry(try_count=5, back_off=1)
-def transaction(func):
-	func()
+def do_with_retry(func, *args, **kwargs):
+	func(*args, **kwargs)
 
 
 class AppConstants(object):
@@ -44,7 +44,7 @@ class Guestbook(ndb.Model):
 		@ndb.transactional
 		def txn(ent, **kwds):
 			ent.populate(**kwds)
-			transaction(lambda: ent.put())
+			do_with_retry(lambda: ent.put())
 			return ent
 
 		return txn(guestbook, name=guestbook_name)
@@ -107,7 +107,7 @@ class Greeting(ndb.Model):
 			def txn(key, **kwds):
 				ent = key.get()
 				ent.populate(**kwds)
-				transaction(lambda: ent.put())
+				do_with_retry(lambda: ent.put())
 				return ent
 
 			return txn(greeting.key, **kwargs)
@@ -127,7 +127,7 @@ class Greeting(ndb.Model):
 			@ndb.transactional
 			def txn(ent):
 				if ent:
-					transaction(lambda: ent.key.delete())
+					do_with_retry(lambda: ent.key.delete())
 					return True
 				return False
 
@@ -141,7 +141,7 @@ class Greeting(ndb.Model):
 		@ndb.transactional
 		def txn(ent, **kwds):
 			ent.populate(**kwds)
-			transaction(lambda: ent.put())
+			do_with_retry(lambda: ent.put())
 			return ent
 
 		is_guestbook_exist = True
