@@ -145,7 +145,6 @@ class MainView(TemplateView):
 	template_name = "main_view.html"
 	
 	def get_context_data(self, *args, **kwargs):
-		a = kwargs.pop("user", None)
 		guestbook_name = self.request.GET.get('guestbook_name', AppConstants.get_default_guestbook_name())
 		greetings = Greeting.get_greetings(guestbook_name)
 
