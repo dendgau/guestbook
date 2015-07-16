@@ -21,7 +21,7 @@ define([
 				if (oldValue !== value){
 					this.guestbookName = value;
 					this.jsonRest = new JsonRest({
-						target: "/guestbook_app/guestbook/" + this.guestbookName + "/greeting",
+						target: "/guestbook_app/api/guestbook/" + this.guestbookName + "/greeting",
 						headers: {"X-CSRFToken": cookie("csrftoken")}
 					});
 				}
@@ -29,6 +29,7 @@ define([
 		},
 
 		getGreetings: function(guestbook_name, cursor){
+			console.log(this.jsonRest)
 			return this.jsonRest.query({
 				"cursor" : cursor
 			});
@@ -36,7 +37,6 @@ define([
 
 		addGreeting: function(greeting_message){
 			return this.jsonRest.add({
-				"guestbook_name": this.guestbookName,
 				"greeting_message": greeting_message
 			});
 		},
@@ -51,7 +51,6 @@ define([
 
 		updateGreeting: function(greeting_id, greeting_message){
 			return this.jsonRest.put({
-				"guestbook_name": this.guestbookName,
 				"greeting_message": greeting_message,
 				"id": greeting_id
 			});

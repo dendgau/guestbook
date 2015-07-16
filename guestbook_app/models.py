@@ -67,12 +67,16 @@ class Greeting(ndb.Model):
 			{
 				"greeting_id": greeting.key.id(),
 				"greeting_auth": str(greeting.author),
-				"greeting_content": greeting.content,
+				"greeting_content": str(greeting.content),
 				"greeting_date": str(greeting.date)
 			} for greeting in greetings
 		]
 
 		return greeting_json, next_cursor, is_more
+
+	@classmethod
+	def create_greeting(cls, guestbook_name):
+		return Greeting(parent=Guestbook.get_guestbook_key(guestbook_name))
 
 	@classmethod
 	def get_greetings(cls, guestbook_name=AppConstants.get_default_guestbook_name(), count=20):

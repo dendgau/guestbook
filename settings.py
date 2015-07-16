@@ -38,6 +38,8 @@ INSTALLED_APPS = (
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
+
+	'guestbook_app'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -49,14 +51,14 @@ MIDDLEWARE_CLASSES = (
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = (										 
+TEMPLATE_CONTEXT_PROCESSORS = (
 	"django.core.context_processors.request",
-	"django.core.context_processors.debug",						 
-	"django.core.context_processors.i18n",						  
-	"django.core.context_processors.media",						 
-	"django.core.context_processors.static",						
-	"django.core.context_processors.tz",							
-	"django.contrib.messages.context_processors.messages"  
+	"django.core.context_processors.debug",
+	"django.core.context_processors.i18n",
+	"django.core.context_processors.media",
+	"django.core.context_processors.static",
+	"django.core.context_processors.tz",
+	"django.contrib.messages.context_processors.messages"
 )   
 
 ROOT_URLCONF = 'urls'
@@ -69,7 +71,7 @@ ROOT_URLCONF = 'urls'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC+7'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 

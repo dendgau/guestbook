@@ -10,36 +10,7 @@ from django.views.generic.edit import FormView
 from django.views.generic.base import TemplateView
 
 from guestbook_app.models import Greeting, AppConstants
-
-
-class SignForm(forms.Form):
-	guestbook_name = forms.CharField(
-		label="Guest_book Name",
-		max_length=20,
-		required=False,
-		widget=forms.TextInput()
-	)
-	greeting_message = forms.CharField(
-		label="Greeting Massage",
-		max_length=50,
-		required=True,
-		widget=forms.Textarea()
-	)
-
-
-class DeleteForm(forms.Form):
-	guestbook_name = forms.CharField(
-		label="Guestbook Name",
-		max_length=20,
-		required=False,
-		widget=forms.HiddenInput()
-	)
-	greeting_id = forms.CharField(
-		label="Greeting ID",
-		max_length=50,
-		required=False,
-		widget=forms.HiddenInput()
-	)
+from guestbook_app.forms import SignForm, DeleteForm
 
 
 class SignView(FormView):
