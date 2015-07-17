@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.conf.urls import patterns, url
-from guestbook_app import forms
+from guestbook_app.api import forms
 from guestbook_app.api import api
 
 from django.contrib import admin

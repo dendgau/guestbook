@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime
 from google.appengine.ext import ndb
-from google.appengine.api import users
 from google.appengine.datastore.datastore_query import Cursor
 
 from .decorator import retry
@@ -19,17 +17,17 @@ class AppConstants(object):
 		return "default_guestbook"
 
 
-class Guestbook(ndb.Model):
+class GuestbookModel(ndb.Model):
 	"""Guestbook Model"""
 	name = ndb.StringProperty(indexed=True)
 	
 	@staticmethod
 	def get_guestbook_key(guestbook_name=AppConstants.get_default_guestbook_name()):
-		return ndb.Key('Guestbook', guestbook_name)
+		return ndb.Key('GuestbookModel', guestbook_name)
 		
 	@classmethod
 	def get_guestbook_by_name(cls, guestbook_name):
-		return cls.query(Guestbook.name == guestbook_name).get()
+		return cls.query(cls.name == guestbook_name).get()
 	
 	@classmethod
 	def check_is_exist(cls, guestbook_name):
@@ -50,7 +48,7 @@ class Guestbook(ndb.Model):
 		return txn(guestbook, name=guestbook_name)
 
 
-class Greeting(ndb.Model):
+class GreetingModel(ndb.Model):
 	"""Greeting Model"""
 	author = ndb.UserProperty()
 	content = ndb.StringProperty(indexed=False)
@@ -60,14 +58,14 @@ class Greeting(ndb.Model):
 	def get_greeting_with_cursor(cls, url_safe, guestbook_name, count=20):
 		start_cursor = Cursor(urlsafe=url_safe)
 		greetings, next_cursor, is_more = cls.query(
-			ancestor=Guestbook.get_guestbook_key(guestbook_name)
-		).order(-Greeting.date).fetch_page(count, start_cursor=start_cursor)
+			ancestor=GuestbookModel.get_guestbook_key(guestbook_name)
+		).order(-cls.date).fetch_page(count, start_cursor=start_cursor)
 
 		greeting_json = [
 			{
 				"greeting_id": greeting.key.id(),
 				"greeting_auth": str(greeting.author),
-				"greeting_content": str(greeting.content),
+				"greeting_content": greeting.content,
 				"greeting_date": str(greeting.date)
 			} for greeting in greetings
 		]
@@ -75,14 +73,10 @@ class Greeting(ndb.Model):
 		return greeting_json, next_cursor, is_more
 
 	@classmethod
-	def create_greeting(cls, guestbook_name):
-		return Greeting(parent=Guestbook.get_guestbook_key(guestbook_name))
-
-	@classmethod
 	def get_greetings(cls, guestbook_name=AppConstants.get_default_guestbook_name(), count=20):
 		greetings = cls.query(
-			ancestor=Guestbook.get_guestbook_key(guestbook_name)
-		).order(-Greeting.date).fetch(count)
+			ancestor=GuestbookModel.get_guestbook_key(guestbook_name)
+		).order(-cls.date).fetch(count)
 
 		return greetings
 
@@ -93,7 +87,7 @@ class Greeting(ndb.Model):
 		except ValueError:
 			raise ValueError("Greeting ID must be a positive integer. Please try again!")
 
-		key = ndb.Key("Guestbook", str(guestbook_name), "Greeting", greeting_id)
+		key = ndb.Key("GuestbookModel", str(guestbook_name), "GreetingModel", greeting_id)
 		greeting = key.get()
 		return greeting
 
@@ -149,11 +143,11 @@ class Greeting(ndb.Model):
 			return ent
 
 		is_guestbook_exist = True
-		if Guestbook.check_is_exist(guestbook_name) is False:
-			is_guestbook_exist = Guestbook.add_new_book(guestbook_name)
+		if GuestbookModel.check_is_exist(guestbook_name) is False:
+			is_guestbook_exist = GuestbookModel.add_new_book(guestbook_name)
 
 		if is_guestbook_exist:
-			greeting = cls(parent=Guestbook.get_guestbook_key(guestbook_name))
+			greeting = cls(parent=GuestbookModel.get_guestbook_key(guestbook_name))
 			return txn(greeting, **kwargs)
 
 		return False

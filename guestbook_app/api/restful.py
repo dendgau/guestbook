@@ -5,13 +5,14 @@ import importlib
 from django import http
 from django.http import QueryDict
 from django.utils import simplejson as json
-from django.views.generic.edit import FormView, BaseFormView
+from django.views.generic.edit import BaseFormView
 from django.http import HttpResponse
 
 from google.appengine.api import users
 
-from guestbook_app.models import Greeting, AppConstants
-from guestbook_app.views import SignForm
+from guestbook_app.models import AppConstants
+
+GUESTBOOK_DEFAULT = AppConstants.get_default_guestbook_name()
 
 
 def _execute_service(view, method_name, **param):
@@ -23,8 +24,8 @@ def _execute_service(view, method_name, **param):
 	if method and callable(method):
 		try:
 			return method(**kwargs)
-		except NotImplementedError, exc:
-			view.logger.info('%r', exc, exc_info=1)
+		except NotImplementedError:
+			raise NotImplementedError("Can't found method in class")
 
 
 class JSONResponseMixin(object):
@@ -44,17 +45,18 @@ class GreetingViewBase(JSONResponseMixin, BaseFormView):
 	service_name = None
 
 	def get_service(self):
-
-		services_dir = '.'.join(("guestbook_app", "services", self.service_name))
+		module_name = self.service_name.split("Service")[0]
+		module_name = module_name.lower()
+		services_module = '.'.join(("guestbook_app", "api", "services", module_name))
 		try:
-			import_module = importlib.import_module(services_dir)
+			import_module = importlib.import_module(services_module)
 		except ImportError:
-			raise ImportError("No module name")
+			raise ImportError("Can't found module name")
 
 		try:
 			import_class = getattr(import_module, self.service_name)
 		except AttributeError:
-			raise AttributeError("No class name")
+			raise AttributeError("Can't found class name")
 
 		return import_class
 
@@ -88,7 +90,7 @@ class GreetingView(GreetingViewBase):
 
 	def get(self, *args, **kwargs):
 		url_safe = self.request.GET.get("cursor", None)
-		guestbook_name = kwargs.get("guestbook_name", AppConstants.get_default_guestbook_name())
+		guestbook_name = kwargs.get("guestbook_name", GUESTBOOK_DEFAULT)
 
 		res = self.list_resources(guestbook_name=guestbook_name, url_safe=url_safe)
 		return self.render_to_response(res)
@@ -112,23 +114,22 @@ class GreetingView(GreetingViewBase):
 
 	def greeting_create(self, form, **kwargs):
 
-		guestbook_name = self.kwargs.get(
-			"guestbook_name",
-			AppConstants.get_default_guestbook_name()
-		)
+		guestbook_name = self.kwargs.get("guestbook_name", GUESTBOOK_DEFAULT)
 		greeting_content = form.cleaned_data["greeting_message"]
 
 		dictionary = {
 			'content': greeting_content,
 			'author': users.get_current_user() if users.get_current_user() else None
 		}
-		return self.create_resources(guestbook_name=guestbook_name, **dictionary)
+
+		kwargs.update(dictionary)
+		return self.create_resources(guestbook_name=guestbook_name, **kwargs)
 
 
 class GreetingDetailView(GreetingViewBase):
 
-	def form_valid(self, form):
-		greeting = self.greeting_update(form)
+	def form_valid(self, form, **kwargs):
+		greeting = self.greeting_update(form, **kwargs)
 		if greeting:
 			return HttpResponse(status=204)
 		else:
@@ -179,7 +180,7 @@ class GreetingDetailView(GreetingViewBase):
 		else:
 			return HttpResponse(status=404)
 
-	def greeting_update(self, form):
+	def greeting_update(self, form, **kwargs):
 
 		greeting_id = self.kwargs.get("greeting_id")
 		guestbook_name = self.kwargs.get("guestbook_name")
@@ -191,8 +192,9 @@ class GreetingDetailView(GreetingViewBase):
 			'date': datetime.datetime.now(),
 		}
 
+		kwargs.update(dictionary)
 		return self.update_resources(
 			guestbook_name=guestbook_name,
 			greeting_id=greeting_id,
-			**dictionary
+			**kwargs
 		)
