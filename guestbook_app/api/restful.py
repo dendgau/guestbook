@@ -41,8 +41,9 @@ class JSONResponseMixin(object):
 		return json.dumps(context)
 
 
-class GreetingViewBase(JSONResponseMixin, BaseFormView):
+class ResourceViewBase(JSONResponseMixin, BaseFormView):
 	service_name = None
+	query_form_class = None
 
 	def get_service(self):
 		module_name = self.service_name.split("Service")[0]
@@ -60,39 +61,27 @@ class GreetingViewBase(JSONResponseMixin, BaseFormView):
 
 		return import_class
 
-	def list_resources(self, **param):
-		return _execute_service(self, 'list', **param)
+	def get_query_form(self, query_form_class):
+		kwargs = {}
+		kwargs.update({
+			'data': self.request.POST,
+			'files': self.request.FILES,
+		})
+		return query_form_class(**kwargs)
 
-	def get_resources(self, **param):
-		return _execute_service(self, 'get', **param)
-
-	def create_resources(self, **param):
-		return _execute_service(self, 'create', **param)
-
-	def update_resources(self, **param):
-		return _execute_service(self, 'update', **param)
-
-	def delete_resources(self, **param):
-		return _execute_service(self, 'delete', **param)
-
-
-class GreetingView(GreetingViewBase):
-
-	def form_valid(self, form, *args, **kwargs):
-		new_greeting = self.greeting_create(form, **kwargs)
-		if new_greeting:
-			return HttpResponse(status=204)
-		else:
-			return HttpResponse(status=404)
-
-	def form_invalid(self, form):
-		return HttpResponse(status=400)
+class CollectionResourceView(ResourceViewBase):
 
 	def get(self, *args, **kwargs):
-		url_safe = self.request.GET.get("cursor", None)
-		guestbook_name = kwargs.get("guestbook_name", GUESTBOOK_DEFAULT)
+		self.request.POST = self.request.GET
 
-		res = self.list_resources(guestbook_name=guestbook_name, url_safe=url_safe)
+		query_form = self.get_query_form(self.query_form_class)
+		if not query_form.is_valid():
+			return HttpResponse(status=400)
+
+		if query_form is not None:
+			kwargs.update(query_form.cleaned_data)
+
+		res = self.list_resources(**kwargs)
 		return self.render_to_response(res)
 
 	def post(self, request, *args, **kwargs):
@@ -107,36 +96,29 @@ class GreetingView(GreetingViewBase):
 		form_class = self.get_form_class()
 		form = self.get_form(form_class)
 
-		if form.is_valid():
-			return self.form_valid(form)
-		else:
-			return self.form_invalid(form)
+		if not form.is_valid():
+			return HttpResponse(status=400)
 
-	def greeting_create(self, form, **kwargs):
-
-		guestbook_name = self.kwargs.get("guestbook_name", GUESTBOOK_DEFAULT)
-		greeting_content = form.cleaned_data["greeting_message"]
-
-		dictionary = {
-			'content': greeting_content,
+		kwargs.update({
+			'guestbook_name': self.kwargs.get("guestbook_name", GUESTBOOK_DEFAULT),
+			'content': form.cleaned_data["greeting_message"],
 			'author': users.get_current_user() if users.get_current_user() else None
-		}
+		})
 
-		kwargs.update(dictionary)
-		return self.create_resources(guestbook_name=guestbook_name, **kwargs)
-
-
-class GreetingDetailView(GreetingViewBase):
-
-	def form_valid(self, form, **kwargs):
-		greeting = self.greeting_update(form, **kwargs)
-		if greeting:
+		new_greeting = self.create_resources(**kwargs)
+		if new_greeting:
 			return HttpResponse(status=204)
 		else:
 			return HttpResponse(status=404)
 
-	def form_invalid(self, form):
-		return HttpResponse(status=400)
+	def list_resources(self, **param):
+		return _execute_service(self, 'list', **param)
+
+	def create_resources(self, **param):
+		return _execute_service(self, 'create', **param)
+
+
+class SingleResourceView(ResourceViewBase):
 
 	def get(self, request, *args, **kwargs):
 
@@ -160,13 +142,24 @@ class GreetingDetailView(GreetingViewBase):
 		form_class = self.get_form_class()
 		form = self.get_form(form_class)
 
-		if form.is_valid():
-			return self.form_valid(form)
+		if not form.is_valid():
+			return HttpResponse(status=400)
+
+		kwargs.update({
+			'greeting_id': self.kwargs.get("greeting_id"),
+			'guestbook_name': self.kwargs.get("guestbook_name"),
+			'content': form.cleaned_data["greeting_message"],
+			'author': users.get_current_user() if users.get_current_user() else None,
+			'date': datetime.datetime.now(),
+		})
+
+		update_greeting = self.update_resources(**kwargs)
+		if update_greeting:
+			return HttpResponse(status=204)
 		else:
-			return self.form_invalid(form)
+			return HttpResponse(status=404)
 
 	def delete(self, *args, **kwargs):
-
 		greeting_id = kwargs.get("greeting_id")
 		guestbook_name = kwargs.get("guestbook_name")
 
@@ -180,21 +173,11 @@ class GreetingDetailView(GreetingViewBase):
 		else:
 			return HttpResponse(status=404)
 
-	def greeting_update(self, form, **kwargs):
+	def get_resources(self, **param):
+		return _execute_service(self, 'get', **param)
 
-		greeting_id = self.kwargs.get("greeting_id")
-		guestbook_name = self.kwargs.get("guestbook_name")
-		greeting_content = form.cleaned_data["greeting_message"]
+	def update_resources(self, **param):
+		return _execute_service(self, 'update', **param)
 
-		dictionary = {
-			'author': users.get_current_user() if users.get_current_user() else None,
-			'content': greeting_content,
-			'date': datetime.datetime.now(),
-		}
-
-		kwargs.update(dictionary)
-		return self.update_resources(
-			guestbook_name=guestbook_name,
-			greeting_id=greeting_id,
-			**kwargs
-		)
+	def delete_resources(self, **param):
+		return _execute_service(self, 'delete', **param)

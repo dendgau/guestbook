@@ -29,9 +29,8 @@ define([
 		},
 
 		getGreetings: function(guestbook_name, cursor){
-			console.log(this.jsonRest)
 			return this.jsonRest.query({
-				"cursor" : cursor
+				"url_safe" : cursor
 			});
 		},
 

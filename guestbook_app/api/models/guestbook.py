@@ -10,12 +10,12 @@ class AppConstants(object):
 		return "default_guestbook"
 
 
-class GuestbookModel(ndb.Model):
+class Guestbook(ndb.Model):
 	name = ndb.StringProperty(indexed=True)
 	
 	@staticmethod
 	def get_guestbook_key(guestbook_name):
-		return ndb.Key('GuestbookModel', guestbook_name)
+		return ndb.Key('Guestbook', guestbook_name)
 		
 	@classmethod
 	def get_guestbook_by_name(cls, guestbook_name):

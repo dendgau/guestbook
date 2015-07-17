@@ -11,6 +11,15 @@ class SignForm(forms.Form):
 	)
 
 
+class QueryCursorForm(forms.Form):
+	url_safe = forms.CharField(
+		label="Cursor",
+		max_length=200,
+		required=False,
+		widget=forms.TextInput()
+	)
+
+
 class DeleteForm(forms.Form):
 	guestbook_name = forms.CharField(
 		label="Guestbook Name",

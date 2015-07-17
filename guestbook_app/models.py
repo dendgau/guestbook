@@ -17,13 +17,13 @@ class AppConstants(object):
 		return "default_guestbook"
 
 
-class GuestbookModel(ndb.Model):
+class Guestbook(ndb.Model):
 	"""Guestbook Model"""
 	name = ndb.StringProperty(indexed=True)
 	
 	@staticmethod
 	def get_guestbook_key(guestbook_name=AppConstants.get_default_guestbook_name()):
-		return ndb.Key('GuestbookModel', guestbook_name)
+		return ndb.Key('Guestbook', guestbook_name)
 		
 	@classmethod
 	def get_guestbook_by_name(cls, guestbook_name):
@@ -48,7 +48,7 @@ class GuestbookModel(ndb.Model):
 		return txn(guestbook, name=guestbook_name)
 
 
-class GreetingModel(ndb.Model):
+class Greeting(ndb.Model):
 	"""Greeting Model"""
 	author = ndb.UserProperty()
 	content = ndb.StringProperty(indexed=False)
@@ -58,7 +58,7 @@ class GreetingModel(ndb.Model):
 	def get_greeting_with_cursor(cls, url_safe, guestbook_name, count=20):
 		start_cursor = Cursor(urlsafe=url_safe)
 		greetings, next_cursor, is_more = cls.query(
-			ancestor=GuestbookModel.get_guestbook_key(guestbook_name)
+			ancestor=Guestbook.get_guestbook_key(guestbook_name)
 		).order(-cls.date).fetch_page(count, start_cursor=start_cursor)
 
 		greeting_json = [
@@ -75,7 +75,7 @@ class GreetingModel(ndb.Model):
 	@classmethod
 	def get_greetings(cls, guestbook_name=AppConstants.get_default_guestbook_name(), count=20):
 		greetings = cls.query(
-			ancestor=GuestbookModel.get_guestbook_key(guestbook_name)
+			ancestor=Guestbook.get_guestbook_key(guestbook_name)
 		).order(-cls.date).fetch(count)
 
 		return greetings
@@ -87,7 +87,7 @@ class GreetingModel(ndb.Model):
 		except ValueError:
 			raise ValueError("Greeting ID must be a positive integer. Please try again!")
 
-		key = ndb.Key("GuestbookModel", str(guestbook_name), "GreetingModel", greeting_id)
+		key = ndb.Key("Guestbook", str(guestbook_name), "Greeting", greeting_id)
 		greeting = key.get()
 		return greeting
 
@@ -143,11 +143,11 @@ class GreetingModel(ndb.Model):
 			return ent
 
 		is_guestbook_exist = True
-		if GuestbookModel.check_is_exist(guestbook_name) is False:
-			is_guestbook_exist = GuestbookModel.add_new_book(guestbook_name)
+		if Guestbook.check_is_exist(guestbook_name) is False:
+			is_guestbook_exist = Guestbook.add_new_book(guestbook_name)
 
 		if is_guestbook_exist:
-			greeting = cls(parent=GuestbookModel.get_guestbook_key(guestbook_name))
+			greeting = cls(parent=Guestbook.get_guestbook_key(guestbook_name))
 			return txn(greeting, **kwargs)
 
 		return False

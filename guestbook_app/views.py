@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.views.generic.edit import FormView
 from django.views.generic.base import TemplateView
 
-from guestbook_app.models import GreetingModel, AppConstants
+from guestbook_app.models import Greeting, AppConstants
 
 
 class SignForm(forms.Form):
@@ -74,7 +74,7 @@ class SignView(FormView):
 			'content': form.cleaned_data["greeting_message"],
 			'author': users.get_current_user() if users.get_current_user() else None,
 		}
-		return GreetingModel.put_from_dict(guestbook_name, **dictionary)
+		return Greeting.put_from_dict(guestbook_name, **dictionary)
 
 
 class GreetingEditView(FormView):
@@ -87,7 +87,7 @@ class GreetingEditView(FormView):
 
 		guestbook_name = self.request.GET.get("guestbook_name")
 		greeting_id = self.request.GET.get("greeting_id")
-		greeting = GreetingModel.get_greeting(greeting_id, guestbook_name)
+		greeting = Greeting.get_greeting(greeting_id, guestbook_name)
 
 		initial["greeting_message"] = greeting.content
 		initial["guestbook_name"] = guestbook_name
@@ -107,7 +107,7 @@ class GreetingEditView(FormView):
 			'date': datetime.datetime.now(),
 		}
 
-		return GreetingModel.update_greeting(
+		return Greeting.update_greeting(
 			guestbook_name=guestbook_name,
 			greeting_id=greeting_id,
 			**dictionary
@@ -138,7 +138,7 @@ class GreetingDeleteView(FormView):
 		if self.request.POST.get("btn_yes"):
 			greeting_id = form.cleaned_data["greeting_id"]
 			guestbook_name = form.cleaned_data["guestbook_name"]
-			GreetingModel.delete_greeting(guestbook_name, greeting_id)
+			Greeting.delete_greeting(guestbook_name, greeting_id)
 
 
 class MainView(TemplateView):
@@ -146,7 +146,7 @@ class MainView(TemplateView):
 	
 	def get_context_data(self, *args, **kwargs):
 		guestbook_name = self.request.GET.get('guestbook_name', AppConstants.get_default_guestbook_name())
-		greetings = GreetingModel.get_greetings(guestbook_name)
+		greetings = Greeting.get_greetings(guestbook_name)
 
 		user = users.get_current_user()
 		if user:

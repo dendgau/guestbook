@@ -12,15 +12,16 @@ urlpatterns = patterns(
 	'',
 	url(
 		r"^guestbook/(?P<guestbook_name>.+)/greeting/(?P<greeting_id>\d+)$",
-		api.GreetingDetailView.as_view(
+		api.SingleResourceView.as_view(
 			service_name="GreetingService",
 			form_class=forms.SignForm),
 		name="greeting-service-detail"
 	),
 	url(
 		r"^guestbook/(?P<guestbook_name>.+)/greeting$",
-		api.GreetingView.as_view(
+		api.CollectionResourceView.as_view(
 			service_name="GreetingService",
-			form_class=forms.SignForm),
-		name="greeting-service"),
+			form_class=forms.SignForm,
+			query_form_class=forms.QueryCursorForm),
+		name="greeting-service")
 )

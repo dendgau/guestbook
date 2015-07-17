@@ -2,8 +2,8 @@
 from google.appengine.ext import ndb
 
 from guestbook_app.api.services.guestbook import GuestbookService
-from guestbook_app.api.models.greeting import GreetingModel
-from guestbook_app.api.models.guestbook import GuestbookModel, AppConstants
+from guestbook_app.api.models.greeting import Greeting
+from guestbook_app.api.models.guestbook import Guestbook, AppConstants
 
 GUESTBOOK_DEFAULT = AppConstants.get_default_guestbook_name()
 
@@ -12,7 +12,7 @@ class GreetingService(object):
 
 	@staticmethod
 	def list(guestbook_name=GUESTBOOK_DEFAULT, url_safe=None, count=20, **kwargs):
-		greetings, next_cursor, is_more = GreetingModel.get_greeting_with_cursor(
+		greetings, next_cursor, is_more = Greeting.get_greeting_with_cursor(
 			url_safe=url_safe,
 			guestbook_name=guestbook_name,
 			count=count,
@@ -30,7 +30,7 @@ class GreetingService(object):
 
 	@staticmethod
 	def get(greeting_id=None, guestbook_name=GUESTBOOK_DEFAULT, **kwargs):
-		greeting = GreetingModel.get_greeting(greeting_id, guestbook_name)
+		greeting = Greeting.get_greeting(greeting_id, guestbook_name)
 
 		data = {
 			"guestbook_name": guestbook_name,
@@ -52,11 +52,11 @@ class GreetingService(object):
 			return ent
 
 		is_guestbook_exist = True
-		if GuestbookModel.check_is_exist(guestbook_name) is False:
+		if Guestbook.check_is_exist(guestbook_name) is False:
 			is_guestbook_exist = GuestbookService.create(guestbook_name)
 
 		if is_guestbook_exist:
-			greeting = GreetingModel.create_greeting(guestbook_name)
+			greeting = Greeting.create_greeting(guestbook_name)
 			return txn(greeting, **kwargs)
 
 		return False
@@ -68,7 +68,7 @@ class GreetingService(object):
 		except ValueError:
 			raise ValueError("Greeting ID must be a positive integer. Please try again!")
 
-		greeting = GreetingModel.get_greeting(greeting_id, guestbook_name)
+		greeting = Greeting.get_greeting(greeting_id, guestbook_name)
 		if greeting:
 
 			@ndb.transactional
@@ -89,7 +89,7 @@ class GreetingService(object):
 		except ValueError:
 			raise ValueError("Greeting ID must be a positive integer. Please try again!")
 
-		greeting = GreetingModel.get_greeting(greeting_id, guestbook_name)
+		greeting = Greeting.get_greeting(greeting_id, guestbook_name)
 		if greeting:
 
 			@ndb.transactional
