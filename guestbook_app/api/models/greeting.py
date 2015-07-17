@@ -30,7 +30,7 @@ class Greeting(ndb.Model):
 		return greeting_json, next_cursor, is_more
 
 	@classmethod
-	def get_greeting(cls, greeting_id, guestbook_name):
+	def get_greeting(cls, guestbook_name, greeting_id):
 		try:
 			greeting_id = int(greeting_id)
 		except ValueError:

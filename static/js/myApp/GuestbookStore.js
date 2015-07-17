@@ -30,13 +30,14 @@ define([
 
 		getGreetings: function(guestbook_name, cursor){
 			return this.jsonRest.query({
-				"url_safe" : cursor
+				"url_safe" : cursor,
+				"count": 20
 			});
 		},
 
 		addGreeting: function(greeting_message){
 			return this.jsonRest.add({
-				"greeting_message": greeting_message
+				"content": greeting_message
 			});
 		},
 
@@ -50,7 +51,7 @@ define([
 
 		updateGreeting: function(greeting_id, greeting_message){
 			return this.jsonRest.put({
-				"greeting_message": greeting_message,
+				"content": greeting_message,
 				"id": greeting_id
 			});
 		}

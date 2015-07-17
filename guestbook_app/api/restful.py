@@ -15,10 +15,13 @@ from guestbook_app.models import AppConstants
 GUESTBOOK_DEFAULT = AppConstants.get_default_guestbook_name()
 
 
-def _execute_service(view, method_name, **param):
+def _execute_service(view, method_name, form=None, **extra):
 	svc = view.get_service()
 	kwargs = view.kwargs.copy()
-	kwargs.update(param)
+	kwargs.update(extra)
+
+	if form is not None:
+		kwargs.update(form.cleaned_data)
 
 	method = getattr(svc, method_name, None)
 	if method and callable(method):
@@ -69,19 +72,17 @@ class ResourceViewBase(JSONResponseMixin, BaseFormView):
 		})
 		return query_form_class(**kwargs)
 
+
 class CollectionResourceView(ResourceViewBase):
 
 	def get(self, *args, **kwargs):
 		self.request.POST = self.request.GET
-
 		query_form = self.get_query_form(self.query_form_class)
+
 		if not query_form.is_valid():
 			return HttpResponse(status=400)
 
-		if query_form is not None:
-			kwargs.update(query_form.cleaned_data)
-
-		res = self.list_resources(**kwargs)
+		res = self.list_resources(query_form, **kwargs)
 		return self.render_to_response(res)
 
 	def post(self, request, *args, **kwargs):
@@ -100,8 +101,7 @@ class CollectionResourceView(ResourceViewBase):
 			return HttpResponse(status=400)
 
 		kwargs.update({
-			'guestbook_name': self.kwargs.get("guestbook_name", GUESTBOOK_DEFAULT),
-			'content': form.cleaned_data["greeting_message"],
+			'content': form.cleaned_data["content"],
 			'author': users.get_current_user() if users.get_current_user() else None
 		})
 
@@ -111,21 +111,18 @@ class CollectionResourceView(ResourceViewBase):
 		else:
 			return HttpResponse(status=404)
 
-	def list_resources(self, **param):
-		return _execute_service(self, 'list', **param)
+	def list_resources(self, form, **extra):
+		return _execute_service(self, 'list', form, **extra)
 
-	def create_resources(self, **param):
-		return _execute_service(self, 'create', **param)
+	def create_resources(self, **extra):
+		return _execute_service(self, 'create', **extra)
 
 
 class SingleResourceView(ResourceViewBase):
 
 	def get(self, request, *args, **kwargs):
 
-		greeting_id = kwargs.get("greeting_id")
-		guestbook_name = kwargs.get("guestbook_name")
-
-		res = self.get_resources(greeting_id=greeting_id, guestbook_name=guestbook_name)
+		res = self.get_resources(**kwargs)
 		if res is None:
 			return HttpResponse(status=404)
 
@@ -145,39 +142,24 @@ class SingleResourceView(ResourceViewBase):
 		if not form.is_valid():
 			return HttpResponse(status=400)
 
-		kwargs.update({
-			'greeting_id': self.kwargs.get("greeting_id"),
-			'guestbook_name': self.kwargs.get("guestbook_name"),
-			'content': form.cleaned_data["greeting_message"],
-			'author': users.get_current_user() if users.get_current_user() else None,
-			'date': datetime.datetime.now(),
-		})
-
-		update_greeting = self.update_resources(**kwargs)
+		update_greeting = self.update_resources(form, **kwargs)
 		if update_greeting:
 			return HttpResponse(status=204)
 		else:
 			return HttpResponse(status=404)
 
 	def delete(self, *args, **kwargs):
-		greeting_id = kwargs.get("greeting_id")
-		guestbook_name = kwargs.get("guestbook_name")
-
-		res = self.delete_resources(
-			guestbook_name=guestbook_name,
-			greeting_id=greeting_id
-		)
-
+		res = self.delete_resources(**kwargs)
 		if res:
 			return HttpResponse(status=204)
 		else:
 			return HttpResponse(status=404)
 
-	def get_resources(self, **param):
-		return _execute_service(self, 'get', **param)
+	def get_resources(self, **extra):
+		return _execute_service(self, 'get', **extra)
 
-	def update_resources(self, **param):
-		return _execute_service(self, 'update', **param)
+	def update_resources(self, form, **extra):
+		return _execute_service(self, 'update', form, **extra)
 
-	def delete_resources(self, **param):
-		return _execute_service(self, 'delete', **param)
+	def delete_resources(self, **extra):
+		return _execute_service(self, 'delete', **extra)

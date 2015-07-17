@@ -30,7 +30,7 @@ class GreetingService(object):
 
 	@staticmethod
 	def get(greeting_id=None, guestbook_name=GUESTBOOK_DEFAULT, **kwargs):
-		greeting = Greeting.get_greeting(greeting_id, guestbook_name)
+		greeting = Greeting.get_greeting(guestbook_name, greeting_id)
 
 		data = {
 			"guestbook_name": guestbook_name,
@@ -46,20 +46,18 @@ class GreetingService(object):
 	def create(guestbook_name=GUESTBOOK_DEFAULT, **kwargs):
 
 		@ndb.transactional
-		def txn(ent, **kwds):
-			ent.populate(**kwds)
-			ent.do_with_retry(lambda: ent.put())
-			return ent
+		def txn(guestbook_name, **kwds):
+			ent = Greeting.create_greeting(guestbook_name)
+			if ent:
+				ent.populate(**kwds)
+				ent.do_with_retry(lambda: ent.put())
+				return ent
+			return False
 
-		is_guestbook_exist = True
 		if Guestbook.check_is_exist(guestbook_name) is False:
-			is_guestbook_exist = GuestbookService.create(guestbook_name)
+			GuestbookService.create(guestbook_name)
 
-		if is_guestbook_exist:
-			greeting = Greeting.create_greeting(guestbook_name)
-			return txn(greeting, **kwargs)
-
-		return False
+		return txn(guestbook_name, **kwargs)
 
 	@staticmethod
 	def update(guestbook_name=GUESTBOOK_DEFAULT, greeting_id=None, **kwargs):
@@ -68,19 +66,16 @@ class GreetingService(object):
 		except ValueError:
 			raise ValueError("Greeting ID must be a positive integer. Please try again!")
 
-		greeting = Greeting.get_greeting(greeting_id, guestbook_name)
-		if greeting:
-
-			@ndb.transactional
-			def txn(key, **kwds):
-				ent = key.get()
+		@ndb.transactional
+		def txn(guestbook_name, greeting_id, **kwds):
+			ent = Greeting.get_greeting(guestbook_name, greeting_id)
+			if ent:
 				ent.populate(**kwds)
 				ent.do_with_retry(lambda: ent.put())
 				return ent
+			return False
 
-			return txn(greeting.key, **kwargs)
-
-		return False
+		return txn(guestbook_name, greeting_id, **kwargs)
 
 	@staticmethod
 	def delete(guestbook_name=GUESTBOOK_DEFAULT, greeting_id=None, **kwargs):
@@ -89,16 +84,12 @@ class GreetingService(object):
 		except ValueError:
 			raise ValueError("Greeting ID must be a positive integer. Please try again!")
 
-		greeting = Greeting.get_greeting(greeting_id, guestbook_name)
-		if greeting:
+		@ndb.transactional
+		def txn(guestbook_name, greeting_id):
+			ent = Greeting.get_greeting(guestbook_name, greeting_id)
+			if ent:
+				ent.do_with_retry(lambda: ent.key.delete())
+				return True
+			return False
 
-			@ndb.transactional
-			def txn(ent):
-				if ent:
-					ent.do_with_retry(lambda: ent.key.delete())
-					return True
-				return False
-
-			return txn(greeting)
-
-		return False
+		return txn(guestbook_name, greeting_id)

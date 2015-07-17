@@ -9,13 +9,15 @@ class GuestbookService(object):
 
 	@staticmethod
 	def create(guestbook_name=GUESTBOOK_DEFAULT, **kwargs):
-		guestbook = Guestbook.create_guestbook()
 
 		@ndb.transactional
-		def txn(ent, **kwds):
-			ent.populate(**kwds)
-			ent.do_with_retry(lambda: ent.put())
-			return ent
+		def txn(**kwds):
+			ent = Guestbook.create_guestbook()
+			if ent:
+				ent.populate(**kwds)
+				ent.do_with_retry(lambda: ent.put())
+				return ent
+			return False
 
-		return txn(guestbook, name=guestbook_name, **kwargs)
+		return txn(name=guestbook_name, **kwargs)
 

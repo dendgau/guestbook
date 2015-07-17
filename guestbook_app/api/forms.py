@@ -3,7 +3,7 @@ from django import forms
 
 
 class SignForm(forms.Form):
-	greeting_message = forms.CharField(
+	content = forms.CharField(
 		label="Greeting Massage",
 		max_length=50,
 		required=True,
@@ -15,6 +15,13 @@ class QueryCursorForm(forms.Form):
 	url_safe = forms.CharField(
 		label="Cursor",
 		max_length=200,
+		required=False,
+		widget=forms.TextInput()
+	)
+	count = forms.IntegerField(
+		label="Cursor",
+		min_value=10,
+		max_value=100,
 		required=False,
 		widget=forms.TextInput()
 	)

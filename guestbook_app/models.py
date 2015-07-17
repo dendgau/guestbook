@@ -52,7 +52,7 @@ class Greeting(ndb.Model):
 	"""Greeting Model"""
 	author = ndb.UserProperty()
 	content = ndb.StringProperty(indexed=False)
-	date = ndb.DateTimeProperty(auto_now_add=True)
+	date = ndb.DateTimeProperty(auto_now=True)
 
 	@classmethod
 	def get_greeting_with_cursor(cls, url_safe, guestbook_name, count=20):
