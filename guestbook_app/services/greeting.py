@@ -2,9 +2,9 @@
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
-from guestbook_app.api.services.guestbook import GuestbookService
-from guestbook_app.api.models.greeting import Greeting
-from guestbook_app.api.models.guestbook import Guestbook, AppConstants
+from guestbook_app.services.guestbook import GuestbookService
+from guestbook_app.models.greeting import Greeting
+from guestbook_app.models.guestbook import Guestbook, AppConstants
 
 GUESTBOOK_DEFAULT = AppConstants.get_default_guestbook_name()
 
@@ -30,7 +30,7 @@ class GreetingService(object):
 		return data
 
 	@staticmethod
-	def get(greeting_id=None, guestbook_name=GUESTBOOK_DEFAULT, **kwargs):
+	def get(guestbook_name=GUESTBOOK_DEFAULT, greeting_id=None, **kwargs):
 		greeting = Greeting.get_greeting(guestbook_name, greeting_id)
 
 		data = {
@@ -48,7 +48,7 @@ class GreetingService(object):
 
 		@ndb.transactional
 		def txn(guestbook_name, **kwds):
-			ent = Greeting.create_greeting(guestbook_name)
+			ent = Greeting.init(guestbook_name)
 			if ent:
 				author = users.get_current_user()
 				ent.populate(author=author, **kwds)

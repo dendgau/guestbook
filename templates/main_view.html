@@ -12,7 +12,6 @@
 		<thead>
 		<tr>
 			<td>Author</td>
-			<td>Guestbook</td>
 			<td>Content</td>
 			<td>Date</td>
 			{% if userInfo %}<td>Modify</td>{% endif %}
@@ -22,33 +21,30 @@
 			<tbody>
 			<tr>
 				<td>
-					{% if greeting.author.nickname %}
-						{% if userInfo and userInfo == greeting.author %}
+					{% if greeting.greeting_auth %}
+						{% if userInfo and userInfo == greeting.greeting_auth %}
 							<strong>You</strong> wrote
 						{% else %}
-							<strong>{{ greeting.author }}</strong> wrote
+							<strong>{{ greeting.greeting_auth }}</strong> wrote
 						{% endif %}
 					{% else %}
 						An <strong>anonymous person</strong> wrote
 					{% endif %}
 				</td>
 				<td>
-					<strong>{{greeting.key.parent.id}}</strong>
+					<strong>{{ greeting.greeting_content|escape }}</strong><br>
 				</td>
 				<td>
-					<strong>{{ greeting.content|escape }}</strong><br>
-				</td>
-				<td>
-					{{ greeting.date}}
+					{{ greeting.greeting_date}}
 				</td>
 				{% if userInfo %}
 					<td>
 						{% if isAdmin %}
-							<a href="{% url 'edit' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Edit</a>
-							<a href="{% url 'delete' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Remove</a>
+							<a href="{% url 'edit' %}?greeting_id={{ greeting.greeting_id }}&guestbook_name={{ guestbook_name }}">Edit</a>
+							<a href="{% url 'delete' %}?greeting_id={{ greeting.greeting_id }}&guestbook_name={{ guestbook_name }}">Remove</a>
 						{% else %}
-							{% if userInfo == greeting.author %}
-								<a href="{% url 'edit' %}?greeting_id={{greeting.key.id}}&guestbook_name={{greeting.key.parent.id}}">Edit</a>
+							{% if userInfo == greeting.greeting_auth %}
+								<a href="{% url 'edit' %}?greeting_id={{ greeting.greeting_id }}&guestbook_name={{ guestbook_name }}">Edit</a>
 							{% endif %}
 						{% endif %}
 					</td>

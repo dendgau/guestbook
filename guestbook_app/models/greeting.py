@@ -2,7 +2,7 @@
 from google.appengine.ext import ndb
 from google.appengine.datastore.datastore_query import Cursor
 
-from guestbook_app.api.models.guestbook import Guestbook
+from guestbook_app.models.guestbook import Guestbook
 from guestbook_app.decorator import retry
 
 
@@ -10,6 +10,10 @@ class Greeting(ndb.Model):
 	author = ndb.UserProperty()
 	content = ndb.StringProperty(indexed=False)
 	date = ndb.DateTimeProperty(auto_now_add=True)
+
+	@classmethod
+	def init(cls, guestbook_name):
+		return cls(parent=Guestbook.get_guestbook_key(guestbook_name))
 
 	@classmethod
 	def get_greeting_with_cursor(cls, url_safe, guestbook_name, count=20):
@@ -39,10 +43,6 @@ class Greeting(ndb.Model):
 		key = ndb.Key("Guestbook", str(guestbook_name), "Greeting", greeting_id)
 		greeting = key.get()
 		return greeting
-
-	@classmethod
-	def create_greeting(cls, guestbook_name):
-		return cls(parent=Guestbook.get_guestbook_key(guestbook_name))
 
 	@staticmethod
 	def do_with_retry(function, *args, **kwargs):

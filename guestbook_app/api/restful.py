@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import datetime
 import importlib
 
 from django import http
@@ -8,7 +7,7 @@ from django.utils import simplejson as json
 from django.views.generic.edit import BaseFormView
 from django.http import HttpResponse
 
-from guestbook_app.models import AppConstants
+from guestbook_app.models.guestbook import AppConstants
 
 GUESTBOOK_DEFAULT = AppConstants.get_default_guestbook_name()
 
@@ -49,7 +48,7 @@ class ResourceViewBase(JSONResponseMixin, BaseFormView):
 	def get_service(self):
 		module_name = self.service_name.split("Service")[0]
 		module_name = module_name.lower()
-		services_module = '.'.join(("guestbook_app", "api", "services", module_name))
+		services_module = '.'.join(("guestbook_app", "services", module_name))
 		try:
 			import_module = importlib.import_module(services_module)
 		except ImportError:

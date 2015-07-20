@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from google.appengine.ext import ndb
-from guestbook_app.api.models.guestbook import Guestbook, AppConstants
+from guestbook_app.models.guestbook import Guestbook, AppConstants
 
 GUESTBOOK_DEFAULT = AppConstants.get_default_guestbook_name()
 

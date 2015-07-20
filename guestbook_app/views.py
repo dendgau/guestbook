@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from google.appengine.api import users
-from google.appengine.ext import ndb
 
-import datetime
 from django import forms
 from django.contrib import messages
 from django.views.generic.edit import FormView
 from django.views.generic.base import TemplateView
 
-from guestbook_app.models import Greeting, AppConstants
+from guestbook_app.services.greeting import GreetingService, AppConstants
 
 
 class SignForm(forms.Form):
@@ -52,29 +50,30 @@ class SignView(FormView):
 			"text": "Greeting create success."
 		},
 	}
-	
+
 	def get_initial(self):
 		initial = super(SignView, self).get_initial()
 		initial["guestbook_name"] = AppConstants.get_default_guestbook_name()
 		return initial
 
 	def form_valid(self, form):
+		self.greeting_create(form)
 		if self.messages.get("greeting_create"):
 			messages.add_message(
 				self.request,
 				self.messages["greeting_create"]["level"],
 				self.messages["greeting_create"]["text"]
 			)
-		self.greeting_create(form)
 		return super(SignView, self).form_valid(form)
 
 	def greeting_create(self, form):
-		guestbook_name = str(form.cleaned_data["guestbook_name"])
-		dictionary = {
-			'content': form.cleaned_data["greeting_message"],
-			'author': users.get_current_user() if users.get_current_user() else None,
-		}
-		return Greeting.put_from_dict(guestbook_name, **dictionary)
+		guestbook_name = form.cleaned_data["guestbook_name"]
+		greeting_content = form.cleaned_data["greeting_message"]
+
+		return GreetingService.create(
+			guestbook_name,
+			content=greeting_content
+		)
 
 
 class GreetingEditView(FormView):
@@ -87,9 +86,9 @@ class GreetingEditView(FormView):
 
 		guestbook_name = self.request.GET.get("guestbook_name")
 		greeting_id = self.request.GET.get("greeting_id")
-		greeting = Greeting.get_greeting(greeting_id, guestbook_name)
+		greeting = GreetingService.get(guestbook_name, greeting_id)
 
-		initial["greeting_message"] = greeting.content
+		initial["greeting_message"] = greeting["content"]
 		initial["guestbook_name"] = guestbook_name
 		return initial
 
@@ -101,16 +100,11 @@ class GreetingEditView(FormView):
 		greeting_id = self.request.GET.get("greeting_id")
 		guestbook_name = form.cleaned_data["guestbook_name"]
 		greeting_content = form.cleaned_data["greeting_message"]
-		dictionary = {
-			'author': users.get_current_user() if users.get_current_user() else None,
-			'content': greeting_content,
-			'date': datetime.datetime.now(),
-		}
 
-		return Greeting.update_greeting(
-			guestbook_name=guestbook_name,
-			greeting_id=greeting_id,
-			**dictionary
+		return GreetingService.update(
+			guestbook_name,
+			greeting_id,
+			content=greeting_content,
 		)
 
 
@@ -138,7 +132,7 @@ class GreetingDeleteView(FormView):
 		if self.request.POST.get("btn_yes"):
 			greeting_id = form.cleaned_data["greeting_id"]
 			guestbook_name = form.cleaned_data["guestbook_name"]
-			Greeting.delete_greeting(guestbook_name, greeting_id)
+			GreetingService.delete(guestbook_name, greeting_id)
 
 
 class MainView(TemplateView):
@@ -146,7 +140,7 @@ class MainView(TemplateView):
 	
 	def get_context_data(self, *args, **kwargs):
 		guestbook_name = self.request.GET.get('guestbook_name', AppConstants.get_default_guestbook_name())
-		greetings = Greeting.get_greetings(guestbook_name)
+		greetings = GreetingService.list(guestbook_name)
 
 		user = users.get_current_user()
 		if user:
@@ -158,11 +152,11 @@ class MainView(TemplateView):
 
 		template_values = {
 			'isAdmin': users.is_current_user_admin(),
-			'userInfo': users.get_current_user(),
-			'greetings': greetings,
-			'guestbook_name': guestbook_name,
+			'userInfo': str(users.get_current_user()),
 			'url': url,
 			'url_linktext': url_linktext,
 		}
+
+		template_values.update(greetings)
 
 		return template_values
