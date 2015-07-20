@@ -1,0 +1,24 @@
+<div style="border: thin solid
+black; border-radius: 5px; padding: 10px; line-height: 30px; margin-bottom: 20px; float:left;
+width: 100%">
+	<div style="float:left; width: 100%">
+		<strong>GreetingID:</strong><span data-dojo-attach-point="greetingIDNode">
+		${greeting_id}</span><br>
+		<strong>Updated by:</strong><span data-dojo-attach-point="authorNode"> ${author}</span><br>
+		<strong>Date:</strong><span data-dojo-attach-point="dateNode"> ${date}</span></br>
+		<strong>Content:</strong><span data-dojo-attach-point="contentNode"> ${!content}</span><br>
+		<span><strong>Tool:</strong></span>
+		<button data-dojo-type="dijit/form/Button"
+				data-dojo-attach-point="deleteButton">Delete</button>
+		<button data-dojo-type="dijit/form/Button"
+				data-dojo-attach-point="openEditFormButton">Edit</button>
+	</div><br>
+	<div data-dojo-attach-point="editFormNode" style="float:left; margin-top: 10px;
+		border-top: thin solid black; padding-top: 10px; width: 100%; display: none">
+		<input required="true" style="width: 96%; height: 100px; padding: 8px" data-dojo-type="dijit/form/ValidationTextBox"
+				data-dojo-props="regExp:'.{1,50}', invalidMessage:'Khong vuot qua 50 ki tu.'"
+				data-dojo-attach-point="textEditGreeting" />
+		<button data-dojo-type="dijit/form/Button"
+				data-dojo-attach-point="submitUpdateGreetingButton">Update</button>
+	</div>
+</div>

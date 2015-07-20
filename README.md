@@ -1,2 +1,0 @@
-# guestbook
-Build guestbook app

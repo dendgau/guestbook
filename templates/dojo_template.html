@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" 
+			href="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dijit/themes/soria/soria.css" />
+	<title></title>
+</head>
+<body>
+<div id="result" style="padding: 20px; width: 650px">
+</div>
+<script>
+	var base = location.href.split("/");
+	base.pop();
+	if (base.length > 3){
+		base.splice(base.length - 1, 1);
+	}
+	base = base.join("/")
+	var dojoConfig  = (function(){
+		return {
+			async: true,
+			isDebug: true,
+			packages: [{
+				name: "myApp",
+				location: base + "/static/js/myApp"
+			}]
+		};
+	})();
+</script>
+<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.3/dojo/dojo.js"></script>
+<script>
+	require(['myApp/App']);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,65 @@
+{% load url from future %}
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Test GuestBook</title>
+</head>
+<body>
+<div class="main">
+	<table>
+		<thead>
+		<tr>
+			<td>Author</td>
+			<td>Content</td>
+			<td>Date</td>
+			{% if userInfo %}<td>Modify</td>{% endif %}
+		</tr>
+		</thead>
+		{% for greeting in greetings %}
+			<tbody>
+			<tr>
+				<td>
+					{% if greeting.greeting_auth %}
+						{% if userInfo and userInfo == greeting.greeting_auth %}
+							<strong>You</strong> wrote
+						{% else %}
+							<strong>{{ greeting.greeting_auth }}</strong> wrote
+						{% endif %}
+					{% else %}
+						An <strong>anonymous person</strong> wrote
+					{% endif %}
+				</td>
+				<td>
+					<strong>{{ greeting.greeting_content|escape }}</strong><br>
+				</td>
+				<td>
+					{{ greeting.greeting_date}}
+				</td>
+				{% if userInfo %}
+					<td>
+						{% if isAdmin %}
+							<a href="{% url 'edit' %}?greeting_id={{ greeting.greeting_id }}&guestbook_name={{ guestbook_name }}">Edit</a>
+							<a href="{% url 'delete' %}?greeting_id={{ greeting.greeting_id }}&guestbook_name={{ guestbook_name }}">Remove</a>
+						{% else %}
+							{% if userInfo == greeting.greeting_auth %}
+								<a href="{% url 'edit' %}?greeting_id={{ greeting.greeting_id }}&guestbook_name={{ guestbook_name }}">Edit</a>
+							{% endif %}
+						{% endif %}
+					</td>
+				{% endif %}
+
+			</tr>
+			</tbody>
+		{% endfor %}
+	</table>
+	<form method="GET">
+		<input type="text" name="guestbook_name" value="{{ guestbook_name }}">
+		<input type="submit" value="Find">
+	</form>
+	<a href="{{ url }}">{{ url_linktext }}</a>
+	<a href="{% url 'sign' %}">Sign Guestbook</a>
+</div>
+</body>
+</html>

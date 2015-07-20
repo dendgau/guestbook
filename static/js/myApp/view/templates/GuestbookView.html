@@ -1,0 +1,23 @@
+<div style="float:left">
+	<span style="font-size: 20px; float:left">
+		<strong>Test DOJO</strong>
+	</span><br>
+	<div style="float:left; width: 100%; margin-top: 10px; border-bottom: thin solid black;
+	margin-bottom: 20px; padding-bottom: 20px">
+		<input data-dojo-attach-point="textSwitchGuestbook"
+				data-dojo-type="dijit/form/TextBox" value=${guestbookName} />
+		<button data-dojo-attach-point="switchGuestbookButton"
+				data-dojo-type="dijit/form/Button">Switch</button>
+	</div>
+	<div style="float:left; width: 100%; margin-top: 10px; border-bottom: thin solid black;
+	margin-bottom: 20px; padding-bottom: 20px">
+		<input required="true" type="text"
+				  data-dojo-type="dijit/form/ValidationTextBox" data-dojo-attach-point="textNewGreeting"
+				  data-dojo-props="regExp:'.{1,50}', invalidMessage:'Khong vuot qua 50 ki tu'"
+				  style="width: 96%; height: 100px; padding: 8px" /><br>
+		<button data-dojo-attach-point="submitNewGreetingButton">Add New Greeting</button>
+	</div>
+	<div id="greetings" style="float:left; width: 100%">
+
+	</div>
+</div>
