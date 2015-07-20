@@ -89,7 +89,7 @@ define([
 			},
 
 			addNewGreeting: function(){
-				if (this.textNewGreeting.validate() == true) {
+				if (this.textNewGreeting.validate() == true){
 					var messageGreeting = this.textNewGreeting.get("value");
 					this.guestbookStore.set("guestbookName", this.guestbookName);
 					this.guestbookStore.addGreeting(messageGreeting)
@@ -97,7 +97,7 @@ define([
 							alert("Insert Success");
 							this.textNewGreeting.set("value", "");
 							this.refreshGreetings();
-						}), function (error) {
+						}), function (error){
 							alert(error);
 						}
 					)

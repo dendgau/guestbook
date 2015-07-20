@@ -76,18 +76,18 @@ define([
 			},
 
 			updateGreeting: function(){
-				if (this.textEditGreeting.validate() == true) {
+				if (this.textEditGreeting.validate() == true){
 					this.content = this.textEditGreeting.value
 					this.guestbookStore.set("guestbookName", this.guestbookName);
 					this.guestbookStore.updateGreeting(this.greeting_id, this.content)
-						.then(lang.hitch(this, function () {
+						.then(lang.hitch(this, function (){
 							alert("Update Success");
 							this.contentNode.innerHTML = this.content
 							var formNode = this.editFormNode;
 							domStyle.set(formNode, {"display": "none"});
 						}), function (error) {
 							alert(error);
-						})
+						});
 				}else{
 					alert("Form Invalid");
 				}

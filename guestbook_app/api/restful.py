@@ -8,8 +8,6 @@ from django.utils import simplejson as json
 from django.views.generic.edit import BaseFormView
 from django.http import HttpResponse
 
-from google.appengine.api import users
-
 from guestbook_app.models import AppConstants
 
 GUESTBOOK_DEFAULT = AppConstants.get_default_guestbook_name()
@@ -67,8 +65,7 @@ class ResourceViewBase(JSONResponseMixin, BaseFormView):
 	def get_query_form(self, query_form_class):
 		kwargs = {}
 		kwargs.update({
-			'data': self.request.POST,
-			'files': self.request.FILES,
+			'data': self.request.GET,
 		})
 		return query_form_class(**kwargs)
 
@@ -76,7 +73,6 @@ class ResourceViewBase(JSONResponseMixin, BaseFormView):
 class CollectionResourceView(ResourceViewBase):
 
 	def get(self, *args, **kwargs):
-		self.request.POST = self.request.GET
 		query_form = self.get_query_form(self.query_form_class)
 
 		if not query_form.is_valid():
@@ -100,12 +96,7 @@ class CollectionResourceView(ResourceViewBase):
 		if not form.is_valid():
 			return HttpResponse(status=400)
 
-		kwargs.update({
-			'content': form.cleaned_data["content"],
-			'author': users.get_current_user() if users.get_current_user() else None
-		})
-
-		new_greeting = self.create_resources(**kwargs)
+		new_greeting = self.create_resources(form, **kwargs)
 		if new_greeting:
 			return HttpResponse(status=204)
 		else:
@@ -114,8 +105,8 @@ class CollectionResourceView(ResourceViewBase):
 	def list_resources(self, form, **extra):
 		return _execute_service(self, 'list', form, **extra)
 
-	def create_resources(self, **extra):
-		return _execute_service(self, 'create', **extra)
+	def create_resources(self, form, **extra):
+		return _execute_service(self, 'create', form, **extra)
 
 
 class SingleResourceView(ResourceViewBase):

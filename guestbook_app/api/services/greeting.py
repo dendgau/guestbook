@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from google.appengine.ext import ndb
+from google.appengine.api import users
 
 from guestbook_app.api.services.guestbook import GuestbookService
 from guestbook_app.api.models.greeting import Greeting
@@ -49,7 +50,8 @@ class GreetingService(object):
 		def txn(guestbook_name, **kwds):
 			ent = Greeting.create_greeting(guestbook_name)
 			if ent:
-				ent.populate(**kwds)
+				author = users.get_current_user()
+				ent.populate(author=author, **kwds)
 				ent.do_with_retry(lambda: ent.put())
 				return ent
 			return False
