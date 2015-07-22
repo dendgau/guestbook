@@ -45,9 +45,9 @@ class Greeting(ndb.Model):
 		return greeting
 
 	@staticmethod
-	def do_with_retry(function, *args, **kwargs):
+	def do_with_retry(function, try_count=5, back_off=1, *args, **kwargs):
 
-		@retry(try_count=5, back_off=1)
+		@retry(try_count=try_count, back_off=back_off)
 		def do_retry(func):
 			func(*args, **kwargs)
 

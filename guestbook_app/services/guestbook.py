@@ -12,7 +12,7 @@ class GuestbookService(object):
 
 		@ndb.transactional
 		def txn(**kwds):
-			ent = Guestbook.create_guestbook()
+			ent = Guestbook.init()
 			if ent:
 				ent.populate(**kwds)
 				ent.do_with_retry(lambda: ent.put())
