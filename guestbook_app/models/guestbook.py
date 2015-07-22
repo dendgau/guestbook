@@ -12,7 +12,11 @@ class AppConstants(object):
 
 class Guestbook(ndb.Model):
 	name = ndb.StringProperty(indexed=True)
-	
+
+	@classmethod
+	def init(cls):
+		return cls()
+
 	@classmethod
 	def get_guestbook_key(cls, guestbook_name):
 		return ndb.Key(cls, guestbook_name)
@@ -26,15 +30,11 @@ class Guestbook(ndb.Model):
 		if cls.get_guestbook_by_name(guestbook_name) is None:
 			return False
 		return True
-	
-	@classmethod
-	def create_guestbook(cls):
-		return cls()
 
 	@staticmethod
-	def do_with_retry(function, *args, **kwargs):
+	def do_with_retry(function, try_count=5, back_off=1, *args, **kwargs):
 
-		@retry(try_count=5, back_off=1)
+		@retry(try_count=try_count, back_off=back_off)
 		def do_retry(func):
 			func(*args, **kwargs)
 
